@@ -1,0 +1,256 @@
+<div class="form-container">
+    <form class="form" id="menuAdd">
+        <h2>Dodaj element menu</h2>
+        <label for="title">Tytuł</label>
+        <input type="text" id="title" name="title" required>
+        <label for="order">Kolejność</label>
+        <input type="number" id="order" name="order" required>
+        <label for="type">Typ</label>
+        <select name="type" id="type" required>
+            <option value="poziom 1">Poziom 1</option>
+            <option value="zawartość">Zawartość</option>
+            <option value="odnośnik">Odnośnik</option>
+            <option value="kategoria">Kategoria</option>
+        </select>
+        <label for="pos-cont"></label>
+        <div class="position-container" id="pos-cont">
+                  
+        </div>
+
+        <div id="tiny" style="width: 100%; display: none;">
+            <label for="mytextarea">Treść</label>
+            <textarea name="body" id="mytextarea" class="mytextarea" rows="30" style="width: 100%"></textarea>
+        </div>
+
+        <label for="target">Target</label>
+        <input type="text" id="target" name="target">
+        <button>Zatwierdź</button>
+    </form>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Tytuł</th>
+                <th>Typ</th>
+                <th>Umiejscowienie</th>
+                <th>Target</th>
+            </tr>
+        </table>
+    </div>
+    <button id="deleteSelected">Usuń zaznaczone</button>
+</div>
+
+<form id="popUp" class="floatFormInvisible" style="z-index: 100;">
+    <div id="close" class="closeButton">
+        <div></div>
+    </div>
+    <textarea name="body" class="mytextarea" id="editContent" rows="30" cols="40" style="width: 100%;"></textarea>
+    <button>Zatwierdź</button>
+</form>
+
+<script>
+    const deleteSelected = document.querySelector('#deleteSelected');
+
+    deleteSelected.addEventListener('click', () => {
+        deleteFromDatabase('/admin/menuDelete?', getMenuTable);
+    });
+</script>
+<script>
+    let target = ''
+    let body = ''
+    const popUp = document.querySelector('#popUp')
+    const close = document.querySelector('#close');
+        close.addEventListener('click', () => {
+            popup(popUp)
+        })
+    popUp.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        body = tinymce.get("editContent").getContent();
+        const res2 = await fetch('/admin/contentAPI', {
+            method: 'PUT',
+            body: JSON.stringify({ target, body }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+
+        const data2 = await res2.json();
+
+        if(data2.ok == "ok") {
+            popup(popUp , 0);
+        }
+    })
+</script>
+<script>
+    const menuAdd = document.querySelector('#menuAdd');
+    menuAdd.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = menuAdd.title.value;
+        const order = menuAdd.order.value;
+        let path = '';
+        path += menuAdd.lvl1 && menuAdd.lvl1.value !== '' ? menuAdd.lvl1.value : '';
+        path += menuAdd.lvl2 && menuAdd.lvl2.value !== '' ? '.' + menuAdd.lvl2.value : '';
+        path += menuAdd.lvl3 && menuAdd.lvl3.value !== '' ? '.' + menuAdd.lvl3.value : '';
+        path == '' ? path = title : path += '.' + title; 
+        const target = menuAdd.target.value;
+        const lvl = /[.]/.test(path) ? path.match(/[.]/g).length + 1 : 1
+        
+        const type = document.querySelector("#type").value
+        try {
+            const res = await fetch('/admin/menuAdd', {
+                method: 'POST',
+                body: JSON.stringify({ order, type, path, target, lvl }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if(data.ok) {
+                const body = tinymce.get("mytextarea").getContent() || ' ';
+                const res2 = await fetch('/admin/contentAPI', {
+                    method: 'POST',
+                    body: JSON.stringify({ body, target }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                const data2 = await res2.json();
+                getMenuTable();
+                inputsClear();  
+            }
+        } catch (err) {
+            console.log(err);
+            getMenuTable();
+            inputsClear();  
+        }
+    })
+</script>
+<script>
+    const getMenuTable = async () => {
+        try{
+            const res = await fetch('/admin/getMenu', {
+                method: 'GET'
+            })
+
+            const data = await res.json();
+            
+            if(data.menu) {
+                const formSelect = document.querySelector('#type');
+                const xd = data.menu
+                formSelect.addEventListener("change", (e) => {
+                    if(formSelect.value != "poziom 1"){
+                        
+                        generatePositionSelect(data, formSelect.value);
+                        document.querySelector("label[for='pos-cont']").innerHTML = 'Umiejscowienie';
+                    }
+                    else{
+                        document.querySelector("#pos-cont").innerHTML = '';
+                        document.querySelector("label[for='pos-cont']").innerHTML = '';
+                    }
+                    const tiny = document.querySelector('#tiny');
+                    
+                    if(formSelect.value.includes('zawartość')) {
+                        tiny.style.display = "block";
+                    } else {
+                        tiny.style.display = "none";
+                    }
+                });
+
+                let div = document.querySelector('table');
+                div.innerHTML = `
+                <tr>
+                    <th>Tytuł</th>
+                    <th>Typ</th>
+                    <th>Kolejność</th>
+                    <th>Umiejscowienie</th>
+                    <th>Target</th>
+                    <th>Usuń</th>
+                </tr>`;
+                let title;
+                for(const doc of data.documents){
+                    tmp = doc.path.split('.');
+                    title = tmp[tmp.length-1];
+                
+                    div.innerHTML += `
+                    <tr>
+                        <td>
+                            <input type="text" name="title" value="${ title }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="type" value="${ doc.type }" readonly>
+                            <button class="invisible edit" data-type="${ doc.type }" data-target="${ doc.target }" >Edytuj</button>
+                        </td>
+                        <td>
+                            <input type="text" name="order" value="${ doc.order }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="path" value="${ doc.path }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="target" value="${ doc.target }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input class="userCheckbox" data-target="${ doc.target }" data-doc="${ doc._id }" type="checkbox">
+                        </td>
+                    </tr>
+                    `;
+                }
+
+                const editButtons = document.querySelectorAll('.edit');
+                for(const button of editButtons) {
+                    if(button.dataset.type === 'zawartość') {
+                        button.style.visibility = 'visible';
+
+                        button.addEventListener('click', async () => {
+                            target = decodeURI(button.dataset.target);
+                            try {
+                                const res = await fetch('/admin/contentAPI?path=' + target, {
+                                    method: 'GET',
+                                })
+                                const data = await res.json();
+
+                                tinymce.get("editContent").setContent(data.content);
+                                popup(popUp, 1);
+
+                            } catch (err) {
+                                console.log(err);
+                            }
+                        })
+                    }
+                }
+
+                const confirmButtons = document.querySelectorAll('.confirm');
+                
+                for(const button of confirmButtons) {
+                    button.addEventListener('click', async () => { 
+                        const _id = button.dataset.id;
+                        const title = button.parentElement.parentElement.querySelector('td input[name="title"]').value
+                        const type = button.parentElement.parentElement.querySelector('td input[name="type"]').value
+                        const order = button.parentElement.parentElement.querySelector('td input[name="order"]').value
+                        const fullPath =  button.parentElement.parentElement.querySelector('td input[name="path"]').value
+                        const shortPath = fullPath.substr(0, fullPath.lastIndexOf('.'));
+                        const path = (shortPath) ? shortPath + '.' + title : title;
+                        const lvl = /[.]/.test(path) ? path.match(/[.]/g).length + 1 : 1;
+                        const target =  button.parentElement.parentElement.querySelector('td input[name="target"]').value
+                        
+                        try {
+                            const res = await fetch('/admin/menuUpdateSingle', {
+                                method: 'PUT',
+                                body: JSON.stringify({ _id, type, path, order, target, lvl}),
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                        
+                            const data = await res.json();
+                        }
+                        catch (err){
+                            console.log(err);
+                        }
+                        inputsClear();
+                        getMenuTable();
+                    })
+                }
+                initializeEditable();
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    window.onload = getMenuTable();
+</script>

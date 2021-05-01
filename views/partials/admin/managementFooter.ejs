@@ -1,0 +1,155 @@
+<div class="form-container">
+    <form class="form" id="footer-Add">
+        <label for="src">Zdjęcie</label>
+        <input type="file" name="image-icon" id="src" onchange="loadFile(event)" accept=".jpg, .jpeg, image/png" required>
+        <img class="preview">
+
+        <label for="alt">Tekst alternatywny</label>
+        <input type="text" name="alt" id="alt" required>
+
+        <label for="target">Link</label>
+        <input type="text" name="target" id="target" required>
+
+        <button>Zatwierdź</button>
+    </form> 
+    <script>
+        const footerAdd = document.querySelector('#footer-Add');
+        footerAdd.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const ic = document.querySelector("input[name='image-icon']")
+                let icon;
+
+                if(ic !== null) {
+                    const icImg = ic.files[0];
+                    const fd = new FormData();
+                    fd.append('file', icImg);
+
+                    const iconUrl = await fetch('/upload/swiper', {
+                        method: "POST",
+                        body: fd
+                    });
+                    icon = await iconUrl.json(); 
+                }
+
+                const src = icon.location;
+                const alt = footerAdd.alt.value;
+                const target = footerAdd.target.value;
+
+                const res = await fetch('/admin/footerSlideAPI', {
+                    method: 'POST',
+                    body: JSON.stringify({ src, alt, target }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await res.json();
+
+                if(data.ok) {
+                    getFooterSlidesTable(slide ,'/admin/footerSlideAPI');
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        })
+    </script>
+    <div class="table-container" id="users">
+        <table>
+        </table>
+    </div>
+    <button id="deleteSelected">Usuń zaznaczone</button>
+</div>
+
+<script>
+    const deleteButton = document.querySelector('#deleteSelected');
+
+    deleteButton.addEventListener('click', () => {
+        deleteFromDatabase('/admin/footerSlideAPI?', getFooterSlidesTable(slide ,'/admin/footerSlideAPI'));
+    })
+</script>
+
+<script>
+    let slide = {
+        _id: '',
+        src: '',
+        alt: '',
+        target: ''
+    }
+
+    const getFooterSlidesTable = async (structureOg, apiUrl) => {
+        let structure = structureOg
+        try {
+            const res = await fetch(apiUrl, {
+                method: "GET"
+            });
+
+            const data = await res.json();
+
+            if(data.documents) {
+                let div = document.querySelector("table");
+                let tableHtml = `<tr>`;
+                for(const prop of Object.getOwnPropertyNames(structureOg)){
+                    if(prop != '_id'){
+                        tableHtml += `<th>${prop}</th>`;
+                    }
+                }
+                tableHtml += `<th>Usuń</th>`;
+                tableHtml += `</tr>`;
+                for(const doc of data.documents) {
+                    tableHtml += '<tr>';
+                    for(propName of Object.getOwnPropertyNames(doc)){
+                        if(propName != 'createdAt' && propName != 'updatedAt' && propName != '__v'){
+                            if(propName != '_id'){
+                                tableHtml += `
+                                    <td>
+                                        <input type="text" name="${propName}" value="${ doc[propName] }" readonly>
+                                        <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                                    </td> 
+                                    `;
+                            }
+                            structureOg[propName] = doc[propName]
+                        }
+                    }
+                    tableHtml += `
+                    <td>
+                            <input data-doc="${doc._id}" class="userCheckbox" type="checkbox">
+                    </td>
+                    </tr>`;
+                    div.innerHTML = tableHtml;
+                }
+                const confirmButtons = document.querySelectorAll('.confirm');
+                
+                for(const button of confirmButtons) {
+                    button.addEventListener('click', async () => { 
+                        const inputs = button.parentElement.parentElement.querySelectorAll('td input:not([type="checkbox"])');
+                        for(input of inputs){
+                            structureOg[input.name] = input.value;
+                        }
+                        structureOg._id = button.dataset.id;
+                        
+                        try {
+                            const res = await fetch(apiUrl, {
+                                method: 'PUT',
+                                body: JSON.stringify(structureOg),
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                        
+                            const data = await res.json();
+                        }
+                        catch (err){
+                            console.log(err);
+                        }
+                        inputsClear();
+                        getFooterSlidesTable(structure, apiUrl)
+                    })
+                }
+            }
+            initializeEditable();
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+    
+    window.onLoad = getFooterSlidesTable(slide ,'/admin/footerSlideAPI');
+</script>

@@ -1,0 +1,31 @@
+<script>
+    /*let arrPath = path.split('/');*/
+    buildings = Object.getOwnPropertyNames(colorfulMenu[arrPath[1]]);
+
+    let generated = 0;
+    finalHTML = ''
+
+    const nav2 = document.createElement('nav');
+    nav2.classList.add('szkoly');
+    for(const lvl2 of buildings) {
+        let podmenuParsed = lvl2.replace('-', ' ');
+        let css = "szkoly-rect"
+        if(arrPath[2] == podmenuParsed)
+            css = "szkoly-rect szkoly-rect-active";
+        if(lvl2 !== 'color' && lvl2 !== 'order' && lvl2 !== 'target' && lvl2 !== 'imageUrl' && lvl2 !== 'backgroundUrl' && lvl2 !== 'description') { 
+            if(lvl2 !== 'test') {
+                let items = Object.getOwnPropertyNames(colorfulMenu[arrPath[1]][lvl2]);
+                if(items.length > 4){
+                    if(!generated) {
+                        generated = 1;
+                    }
+                    finalHTML += `<a rel="noopener" role="button" tabindex="0" style="background: ${colorfulMenu[arrPath[1]].color} class="${css}" href ="${colorfulMenu[arrPath[1]][lvl2].target}"> ${lvl2} </a>`
+                }      
+            } 
+        } 
+    }
+    if(generated) {
+        nav2.innerHTML = finalHTML;
+        document.querySelector('.szkoly').insertAdjacentElement(nav2);
+    }
+</script>

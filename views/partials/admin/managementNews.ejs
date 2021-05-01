@@ -1,0 +1,259 @@
+<div class="form-container">
+    <form class="form">
+        <label for="title">Tytuł</label>
+        <input type="text" name="title" id="title">
+
+        <label for="image">Miniaturka</label>
+        <input type="file" name="image-mini" accept=".jpg, .jpeg, image/png" onchange="loadFile(event)">
+        <img class="preview">
+
+        <label for="alt">Tekst alternatywny miniaturki</label>
+        <input type="text" name="alt" id="alt">
+        <fieldset>
+            <legend>Budynki</legend>
+            <div class="checkbox-container" id="pos-cont">
+            </div>
+        </fieldset>
+
+        <label for="strona glowna">Strona główna</label>
+        <input class="building" id="strona glowna" value="strona główna" type="checkbox">
+
+        <label for="description">Opis</label>
+        <textarea name="description" id="description" cols="70" rows="6" style="resize: none"></textarea>
+        
+        <label for="mytextarea">Treść</label>
+        <textarea name="body" id="mytextarea" class="mytextarea" rows="30" style="width: 90%"></textarea>
+
+        <button>Zatwierdź</button>
+        <br>
+        <br>
+    </form>
+    <div class="table-container">
+        <table>
+
+        </table>
+    </div>
+    <button id="deleteSelected">Usuń zaznaczone</button>
+
+    <form id="popUp" class="floatFormInvisible" style="z-index: 100;">
+        <div id="close" class="closeButton">
+            <div></div>
+        </div>
+        <textarea name="body" class="mytextarea" id="editContent" rows="30" cols="40" style="width: 100%;"></textarea>
+        <button>Zatwierdź</button>
+    </form>
+</div>
+
+<script>
+    let body = '';
+    let _id = '';
+    const popUp = document.querySelector('#popUp')
+    const close = document.querySelector('#close');
+        close.addEventListener('click', () => {
+            popup(popUp, 0)
+        })
+    const deleteButton = document.querySelector('#deleteSelected');
+
+    deleteButton.addEventListener('click', () => {
+        deleteFromDatabase('/admin/newsAPI?', getNewsTable);
+    })
+
+    popUp.addEventListener('submit', async(e) => {
+        e.preventDefault();
+        body = tinymce.get("editContent").getContent();
+
+        const res2 = await fetch('/admin/newsAPI', {
+            method: 'PUT',
+            body: JSON.stringify({ _id, body }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+    
+        const data = await res2.json();
+
+        if(data.ok = "ok") {
+            popup(popUp, 0);
+        }
+    })
+
+</script>
+
+<script>
+    const renderCheckboxes = async () => {
+        try {
+            const res = await fetch('/admin/newsGetBuildings', {
+                method: 'GET'
+            })
+
+            const data = await res.json();
+
+            if(data.buildings) {
+                generateBuildingCheckboxes(data);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+    window.onload = renderCheckboxes();
+</script>
+<script>
+    tinymce.settings.images_upload_url = "/upload/news";
+    const newsForm = document.querySelector('.form');
+    newsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const miniIn = document.querySelector("input[name='image-mini']")
+        const miniImg = miniIn.files[0];
+        const fd = new FormData();
+        fd.append('file', miniImg);
+        let mini;
+        try {
+            const miniUrl = await fetch('/upload/swiper', {
+                method: "POST",
+                body: fd
+            });
+            mini = await miniUrl.json(); 
+        } catch (err) {
+            console.log(err);
+        }
+        
+        const title = newsForm.title.value;
+        const checkboxes = document.querySelectorAll('.building');
+        let tags = '';
+        checkboxes.forEach((el) => { el.checked ? tags += el.value + "#" : '' });
+        tags = tags.substr(0, tags.length - 1);
+        tags = tags.split('#');
+        const description = newsForm.description.value;
+        const body = tinymce.get('mytextarea').save();
+        const imageUrl = mini.location;
+        const imageAlt = newsForm.alt.value;
+
+        try {
+            const res = await fetch('/admin/newsAPI', {
+                method: 'POST',
+                body: JSON.stringify({ title, tags, description, body, imageUrl, imageAlt }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const data = await res.json();
+
+            if(data.ok == "ok") {
+                inputsClear();
+               getNewsTable();
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    })
+</script>
+<script>
+    let tmp = '';
+    let tmp2 = '';
+    const getNewsTable = async () => {
+        try{
+            const res = await fetch('/admin/newsAPI', {
+                method: 'GET'
+            })
+            const data = await res.json();
+            if(data.documents) {
+                let div = document.querySelector('table');
+                div.innerHTML = `
+                <tr>
+                    <th>Data</th>
+                    <th>Tytuł</th>
+                    <th>Tagi</th>
+                    <th>Opis</th>
+                    <th>Treść</th>
+                    <th>Miniaturka</th>
+                    <th>Tekst alternatywny</th>
+                    <th>Usuń</th>
+                </tr>`;
+                for(const doc of data.documents){
+                    div.innerHTML += `
+                    <tr>
+                        <td>
+                            <p>${doc.createdAt.substring(0, 10)}</p>
+                        </td>
+                        <td>
+                            <input name="title" type="text" value="${doc.title}" readonly>
+                            <button data-id="${doc._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input name="tags" type="text" value="${doc.tags}" readonly>
+                            <button data-id="${doc._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input name="description" type="text" value="${doc.description}" readonly>
+                            <button data-id="${doc._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <button data-id="${doc._id}" class="edit">Edytuj</button>
+                        </td>
+                        <td>
+                            <input name="imageUrl" value="${doc.imageUrl}" type="text" readonly>
+                            <button data-id="${doc._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input name="imageAlt" value="${doc.imageAlt}" type="text" readonly>
+                            <button data-id="${doc._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input data-doc="${doc._id}" class="userCheckbox" type="checkbox">
+                        </td>
+                    </tr>
+                    `;
+                }
+            }
+            const editButtons = document.querySelectorAll('.edit');
+
+            for(const button of editButtons) {
+                button.addEventListener('click', async() => {
+                    _id = button.dataset.id;
+                    
+                    try {
+                        const res = await fetch('/admin/newsGetContent?id=' + _id, {
+                            method: 'GET',
+                        })
+                    
+                        const data = await res.json();
+                    
+                        tinymce.get("editContent").setContent(data.content);
+                        popup(popUp, 1);
+                    }
+                    catch (err){
+                        console.log(err);
+                    }
+                })
+            }
+            const confirmButtons = document.querySelectorAll('.confirm');
+            for(const button of confirmButtons) {
+                button.addEventListener('click', async () => {
+                    const _id = button.dataset.id;
+                    const title = button.parentElement.parentElement.querySelector('td input[name="title"]').value;
+                    const tagsString = button.parentElement.parentElement.querySelector('td input[name="tags"]').value; 
+                    const description = button.parentElement.parentElement.querySelector('td input[name="description"]').value; 
+                    const tags = tagsString.split(',');
+                    const imageUrl = button.parentElement.parentElement.querySelector('td input[name="imageUrl"]').value;
+                    const imageAlt = button.parentElement.parentElement.querySelector('td input[name="imageAlt"]').value;
+        
+                    try {
+                        const res = await fetch('/admin/newsAPI', {
+                            method: 'PUT',
+                            body: JSON.stringify({ _id, title, tags, description, imageUrl, imageAlt }),
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                    
+                        const data = await res.json();
+                    }
+                    catch (err){
+                        console.log(err);
+                    }
+                    getNewsTable();
+                })
+            }
+            initializeEditable();
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+   window.onload = getNewsTable();
+</script>

@@ -1,0 +1,20 @@
+<a tabindex="0" role="button" class="nav-arrow nav-arrow-left" href="/aktualnosci/wszystkie">
+    <span>wróć</span>
+</a>
+<section class="news-details">
+    <header>
+        <h3><%= article.title %></h3>
+        <div class="pub-date"><p class="day"><%= article._id.getTimestamp().getDate() %></p><p class="month"><%= article._id.getTimestamp().toLocaleString('default', { month: 'short' }) %></p><p class="year"><%= article._id.getTimestamp().getFullYear() %></p></div>
+    </header>
+    <hr>
+    <article>
+        <% if(article.imageUrl) { %>
+        <figure>
+            <img src="<%= article.imageUrl %>" alt="<%= article.imageAlt %>">
+        </figure>
+        <%}%>
+        <figcaption><%= article.description %></figcaption>
+        <br>
+        <%- article.body %>
+    </article>
+</section>

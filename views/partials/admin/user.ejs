@@ -1,0 +1,220 @@
+<div class="form-container">
+    <form class="form" id="userAdd">
+        <h2 class="form--header">Dodaj użytkownika</h2>
+
+        <label for="username">Użytkownik</label>
+        <input type="text" name="username" id="username" required>
+        <div class="email error"></div>
+
+        <label for="password">Hasło</label>
+        <input type="password" name="password" id="password" required>
+        <div class="password error"></div>
+
+        <label for="role">Uprawnienia</label>
+        <select name="role" id="role" required>
+            <option value="administrator">Administrator</option>
+            <option value="moderator">Moderator</option>
+        </select>
+
+        <p id="alert"></p>
+        <button type="submit">Zatwierdź</button>
+    </form>
+
+    <script>
+        const form = document.querySelector('#userAdd');
+        const usernameError = document.querySelector('.email.error');
+        const passwordError = document.querySelector('.password.error');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // no refresh
+        
+            const username = form.username.value;
+            const password = form.password.value;
+            const privilege = form.role.value;
+        
+            usernameError.textContent = '';
+            passwordError.textContent = '';
+
+            try {
+                const res = await fetch('/admin/userAdd', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password, privilege}),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await res.json();
+                if(data.errors) {
+                    usernameError.textContent = data.errors.username;
+                    if(data.errors.username){
+                        usernameError.classList.add("info")
+                        usernameError.classList.add("info_bad")
+                    }
+                    passwordError.textContent = data.errors.password;
+                    if(data.errors.password){
+                        passwordError.classList.add("info")
+                        passwordError.classList.add("info_bad")
+                    }
+                    document.querySelector('#alert').innerHTML = "";
+                }
+
+                if(data.ok == 'ok') {
+                    let alert = document.querySelector('#alert');
+                    alert.classList.add("info")
+                    alert.classList.add("info_good")
+                    alert.innerHTML = "Użytkownik dodany poprawnie";
+                    getUsersTable();
+                }
+                
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
+    </script>
+
+    <div class="table-container" id="users">
+        <table>
+            <tr>
+                <th style="visibility:hidden"></th>
+                <th>Nazwa użytkownika</th>
+                <th>Uprawnienia</th>
+                <th></th>
+                <th>Usuń</th>
+            </tr>
+        </table>
+    </div>
+    <button id="deleteSelected">Usuń zaznaczone</button>
+    <form class="form floatFormInvisible" id="passwordChange">
+        <div class="closeButton"><div></div></div>
+        <h2 class="form--header">Zmień hasło użytkownika <span id="usernameChange"></span></h2>
+        <label for="password">Nowe hasło:</label>
+        <input type="password" name="password" minlength="6" id="passwordChangeInput" required>
+        <input type="hidden" value="" id="idHidden" name="idHidden">
+        <p class="info" id="passwordResponse"></p>
+        <button>Zmień hasło</button>
+    </form>
+</div>
+<script>
+    const passwordForm = document.querySelector('#passwordChange');
+    document.querySelector('.closeButton').addEventListener('click', () => {
+        popup(passwordForm);
+    });
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const password = passwordForm.password.value;
+        const _id = passwordForm.idHidden.value;
+
+        try {
+            const res = await fetch('/admin/userChangePassword', {
+                method: 'POST',
+                body: JSON.stringify({ _id, password }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+        
+            const data = await res.json();
+            if(data.ok == 'ok') {
+                let passwordResponse = document.querySelector("#passwordResponse");
+                passwordResponse.classList.add("info_good");
+                passwordResponse.innerHTML = "Hasło zmienione poprawnie";
+            }
+        }
+        catch(err){
+            console.log(err);
+        }
+    })
+</script>
+<script>
+    const deleteButton = document.querySelector('#deleteSelected');
+
+    deleteButton.addEventListener('click', () => {
+        deleteFromDatabase('/admin/userDelete?', getUsersTable)
+    });
+</script>
+
+<script>
+    let tmp = '';
+    let tmp2 = '';
+
+    const getUsersTable = async () => {
+        try{
+            const res = await fetch('/admin/getUsers', {
+                method: 'GET'
+            })
+            const data = await res.json();
+            if(data.users) {
+                let div = document.querySelector('table');
+                div.innerHTML = `
+                <tr>
+                    <th>Nazwa użytkownika</th>
+                    <th>Uprawnienia</th>
+                    <th>Hasło</th>
+                    <th>Usuń</th>
+                </tr>`;
+                for(const user of data.users){
+                    let adminSelected = user.privilege == 'administrator' ? 'selected' : '';
+                    let modSelected = user.privilege == 'moderator' ? 'selected' : '';
+                    div.innerHTML += `
+                    <tr>
+                        <td>
+                            <input type="text" value="${ user.username }" readonly>
+                            <button class="invisible confirm" data-id="${ user._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <select data-id="${ user._id }" name="role" readonly>
+                                <option value="administrator" ${adminSelected}>Administrator</option>
+                                <option value="moderator" ${modSelected}>Moderator</option>
+                            </select>
+                            <button class="invisible confirm" data-id="${ user._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <button class="changePassword" data-user="${ user.username }" data-id="${ user._id }">Zmień</button>
+                        </td>
+                        <td>
+                            <input class="userCheckbox" data-doc="${ user._id }" type="checkbox">
+                        </td>
+                    </tr>
+                    `;
+                }
+            }
+            const changePasswordButtons = document.querySelectorAll('.changePassword');
+            for(const button of changePasswordButtons) {
+                button.addEventListener('click', () => {
+                    document.querySelector('#usernameChange').innerHTML = button.dataset.user;
+                    document.querySelector('#idHidden').value = button.dataset.id;
+                    document.querySelector('#passwordChange').classList.remove("floatFormInvisible");
+                    document.querySelector('#passwordChange').classList.add("floatFormVisible");
+                })
+            }
+            const confirmButtons = document.querySelectorAll('.confirm');
+            for(const button of confirmButtons) {
+                button.addEventListener('click', async () => {
+                    const _id = button.dataset.id;
+                    const username = button.parentElement.parentElement.querySelector('td input[type="text"]').value;
+                    const select = button.parentElement.parentElement.querySelector('td select');   
+                    const privilege =  select.options[select.selectedIndex].value
+                    tmp = username;
+                    
+                    try {
+                        const res = await fetch('/admin/userUpdateSingle', {
+                            method: 'PUT',
+                            body: JSON.stringify({ _id, username, privilege }),
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                    
+                        const data = await res.json();
+                    }
+                    catch (err){
+                        console.log(err);
+                    }
+                    inputsClear();
+                    getUsersTable();
+                })
+            }
+            initializeEditable();
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+    window.onload = getUsersTable();
+</script>

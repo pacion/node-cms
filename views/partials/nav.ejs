@@ -1,0 +1,69 @@
+<body>
+<header class="header">
+    <div id="mainNav">
+        <a rel="noopener" id="mainNav_logo" role="button" tabindex="0" href="/">
+            <figure>
+                <img src="/images/logo.png" alt="logo ckziu" >
+            </figure>
+            <h1>
+                Centrum Kształcenia Zawodowego i Ustawicznego w Brodnicy
+            </h1>
+        </a>
+        <div id="upperNav">
+            <div id="upperNav_contact">
+                <a rel="noopener" role="button" tabindex="0" class="contact_a" href="mailto:<%= contact.email %>">
+                    <img src="/images/mail.png" alt="ikonka maila"> <%= contact.email %>
+                </a>
+                <a rel="noopener" role="button" tabindex="0" class="contact_a" href="tel:+48<%= contact.phone %>">
+                    <img src="/images/phone.png" alt="ikonka maila">+48 <%= contact.phone %>
+                </a>
+                <a rel="noopener" role="button" tabindex="0" class="contact_a" href="https://www.google.pl/maps/place/<%=contact.address%>" target="_blank">
+                    <img src="/images/pin.png" alt="ikonka maila"> <%= decodeURI(contact.address) %>
+                </a>
+                <div class="contact_a">
+                    <p>Czcionka:</p>
+                    <p role="button" tabindex="0" style="margin-left: 5px;" id="font-minus">A-</p>
+                    <p role="button" tabindex="0" style="margin-left: 3px;" id="font-plus">A+</p>
+                </div>
+                <div class="contact_a">
+                    <p>Kontrast:</p>
+                    <img role="button" tabindex="0" src="/images/contrast.png" id="contrast" alt="ikona zmiany kontrastu">
+                </div>
+                <div class="contact_a">
+                    <img id="godlo" src="/images/orzel.png" alt="godło polski">
+                    <img id="starostwo" src="/images/jelonek.png" alt="godło starostwa brodnickiego">
+                </div>
+            </div>
+            <div id="lowerNav">
+                <div class="lowerNav_slope">AAAA</div>
+                <nav id="lowerNav_mainNav">
+
+                    <%- generate('menu', menu); %>
+
+                    <form id="search-wrapper">
+                        <label style="position: fixed; top: 9999px; bottom: 9999px" for="szukaj">Szukaj</label>
+                        <input type="search" placeholder="Szukaj" name="search" id="szukaj">
+                        <button id="lupa">
+                            <img src="/images/lupa.png" alt="lupa do szukania">
+                        </button>
+                    </form>
+                    <script>
+                        const form = document.querySelector('#search-wrapper');
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            window.location.href = '/szukaj?s=' + form.search.value;
+                        })
+                    </script>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    const menuJ = `<%- JSON.stringify(menu) %>`
+    const menu = JSON.parse(menuJ)
+    const colorfulMenuJ = `<%- JSON.stringify(colorfulMenu) %>`
+    const colorfulMenu = JSON.parse(colorfulMenuJ)
+    const path = `<%- path %>`
+    const arrPath = path.split('/');
+</script>

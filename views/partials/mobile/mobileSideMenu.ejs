@@ -1,0 +1,163 @@
+<nav id="sideNav" class="mobileSideMenu">
+       
+</nav>
+
+<script>
+    function unwindMenu(element){
+        element.classList.toggle("sideNav_lvl-active")
+    }
+
+    path1 = path
+    path1 = path1.substring(1).split('/');
+    nav = document.querySelector('.mobileSideMenu');
+    let lvls1 = Object.getOwnPropertyNames(menu);
+    for(const lvl1 of lvls1){
+        let lvl1HTML = document.createElement('h3');
+        if (lvl1 == path1[0])
+            lvl1HTML.classList.add('sideNav_lvl-active');
+        if (lvl1 == path1[path1.length - 1])
+            lvl1HTML.classList.add('sideNav_lvl-now-content');
+        lvl1HTML.classList.add('sideNav_lvl1', 'sideNav_lvl');
+
+        if(Object.getOwnPropertyNames(menu[lvl1]).length == 2){
+                let aHTML = document.createElement('a');
+                aHTML.setAttribute('rel', 'noopener');
+                aHTML.href = menu[lvl1].target;
+                aHTML.textContent = lvl1;
+                aHTML.setAttribute('role', 'button');
+                aHTML.setAttribute('tabindex', '0');
+                lvl1HTML.appendChild(aHTML);
+                nav.appendChild(lvl1HTML);
+        }else{
+            lvl1HTML.setAttribute("onclick", `unwindMenu(this)`);
+            lvl1HTML.setAttribute('role', 'button');
+            lvl1HTML.setAttribute('tabindex', '0');
+            let ullvl1 = document.createElement('ul');
+            lvl1HTML.textContent = lvl1;
+            nav.appendChild(lvl1HTML);
+            nav.appendChild(ullvl1);
+            let lvls2 = Object.getOwnPropertyNames(menu[lvl1]);
+            for(const lvl2 of lvls2) {
+                let lvl2HTML = document.createElement('p');
+
+                if (lvl2 == path1[1])
+                    lvl2HTML.classList.add('sideNav_lvl-active');
+                if (lvl2 == path1[path1.length - 1])
+                    lvl2HTML.classList.add('sideNav_lvl-now-content');
+
+                lvl2HTML.classList.add('sideNav_lvl2', 'sideNav_lvl');
+
+                if(Object.getOwnPropertyNames(menu[lvl1][lvl2]).length == 2){
+                    let aHTML = document.createElement('a');
+                    aHTML.setAttribute('rel', 'noopener');
+                    aHTML.href = menu[lvl1][lvl2].target;
+                    aHTML.textContent = lvl2;
+                    aHTML.setAttribute('role', 'button');
+                    aHTML.setAttribute('tabindex', '0');
+                    lvl2HTML.appendChild(aHTML);
+                    ullvl1.appendChild(lvl2HTML);
+                }
+                else{
+                    if(lvl2 !== 'target' && lvl2 !== 'order') {
+                        lvl2HTML.setAttribute("onclick", `unwindMenu(this)`);
+                        lvl2HTML.addEventListener('keyup', e => {
+                            if (e.key === "Enter") {
+                                unwindMenu(lvl2HTML);
+                            }
+                        });
+                        lvl2HTML.setAttribute('role', 'button');
+                        lvl2HTML.setAttribute('tabindex', '0');
+                        lvl2HTML.textContent = lvl2;
+                        ullvl1.appendChild(lvl2HTML);
+                        
+                        let lvls3 = Object.getOwnPropertyNames(menu[lvl1][lvl2]);
+                        if(lvls3.length > 1) {
+                            var ul = document.createElement('ul');
+                            ullvl1.appendChild(ul);
+                        }
+
+                        for(const lvl3 of lvls3) {
+                            if (lvl3 !== 'target' && lvl3 !== 'order') {
+                                let lvl3HTML = document.createElement('p');
+
+                                if(lvl3 == path1[2])
+                                    lvl3HTML.classList.add('sideNav_lvl-active');
+                                if (lvl3 == path1[path1.length - 1])
+                                    lvl3HTML.classList.add('sideNav_lvl-now-content');
+
+                                lvl3HTML.classList.add('sideNav_lvl3', 'sideNav_lvl');
+
+                                if (Object.getOwnPropertyNames(menu[lvl1][lvl2][lvl3]).length == 2) {
+                                    let aHTML = document.createElement('a');
+                                    aHTML.setAttribute('rel', 'noopener');
+                                    aHTML.href = menu[lvl1][lvl2][lvl3].target;
+                                    aHTML.textContent = lvl3;
+                                    aHTML.setAttribute('role', 'button');
+                                    aHTML.setAttribute('tabindex', '0');
+                                    aHTML.setAttribute('rel', 'noopener');
+                                    lvl3HTML.appendChild(aHTML);
+                                    ul.appendChild(lvl3HTML);
+                                }
+                                else{
+                                    lvl3HTML.setAttribute("onclick", `unwindMenu(this)`);
+                                    lvl3HTML.addEventListener('keyup', e => {
+                                        if (e.key === "Enter") {
+                                            unwindMenu(lvl3HTML);
+                                        }
+                                    });
+                                    lvl3HTML.textContent = lvl3;
+                                    lvl3HTML.setAttribute('role', 'button');
+                                    lvl3HTML.setAttribute('tabindex', '0');
+                                    ul.appendChild(lvl3HTML);
+
+                                    let lvls4 = Object.getOwnPropertyNames(menu[lvl1][lvl2][lvl3]);
+                                    if (lvls4.length > 1) {
+                                        var ul2 = document.createElement('ul');
+                                        ul.appendChild(ul2);
+                                    }
+                                    
+                                    for(const lvl4 of lvls4) {
+                                        if (lvl4 !== 'target' && lvl4 !== 'order') {
+                                            let lvl4HTML = document.createElement('p');
+
+                                            if(lvl4 == path1[2])
+                                                lvl4HTML.classList.add('sideNav_lvl-active');
+                                            if(lvl4 == path1[path1.length - 1])
+                                                lvl4HTML.classList.add('sideNav_lvl-now-content');
+
+                                            lvl4HTML.classList.add("sideNav_lvl4", 'sideNav_lvl');
+                                            
+                                            if (Object.getOwnPropertyNames(menu[lvl1][lvl2][lvl3][lvl4]).length == 2) {
+                                                let aHTML = document.createElement('a');
+                                                aHTML.setAttribute('rel', 'noopener');
+                                                aHTML.href = menu[lvl1][lvl2][lvl3][lvl4].target;
+                                                aHTML.textContent = lvl4;
+                                                aHTML.setAttribute('role', 'button');
+                                                aHTML.setAttribute('rel', 'noopener');
+                                                aHTML.setAttribute('tabindex', '0');
+                                                lvl4HTML.appendChild(aHTML);
+                                                ul2.appendChild(lvl4HTML);
+                                            }
+                                            else{
+                                                lvl4HTML.setAttribute("onclick", `unwindMenu(this)`);
+                                                lvl4HTML.addEventListener('keyup', e => {
+                                                    if (e.key === "Enter") {
+                                                        unwindMenu(lvl4HTML);
+                                                    }
+                                                });
+                                                lvl4HTML.textContent = lvl4;
+                                                lvl4HTML.setAttribute('role', 'button');
+                                                lvl4HTML.setAttribute('tabindex', '0');
+                                                ul2.appendChild(lvl4HTML);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }    
+            }
+        }
+    }
+</script>

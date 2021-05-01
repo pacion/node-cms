@@ -1,0 +1,59 @@
+<main class="bubble_all">
+
+</main>
+
+<script>
+    finalHTML = ''
+    const main = document.querySelector('.bubble_all');
+    const bg = colorfulMenu[arrPath[1]].backgroundUrl || 'https://unsplash.it/1920/1080';
+    main.style = 'background: url('+ bg +')' + 'no-repeat center center fixed; background-size: cover;'
+
+    let buildings = Object.getOwnPropertyNames(colorfulMenu[arrPath[1]]);
+    let check = false;
+    for(const lvl2 of buildings) {
+            if(lvl2 !== 'color' && lvl2 !== 'order' && lvl2 !== 'target' && lvl2 !== 'imageUrl' && lvl2 !== 'backgroundUrl') {
+                if(lvl2 === 'test') {
+                    let bubbles = Object.getOwnPropertyNames(colorfulMenu[arrPath[1]]?.test);
+                    if(colorfulMenu[arrPath[1]][lvl2]['description']) {
+                        finalHTML += `<div class="building-desc"><p> ${colorfulMenu[arrPath[1]][lvl2]['description']} </p></div>`
+                    }
+                        finalHTML += `<div class="bubble_wrapper">`
+                    for(const lvl3 of bubbles) { 
+                        if(lvl3 === 'description' && colorfulMenu[arrPath[1]][lvl2][lvl3]) {
+
+                         } else if(lvl3 !== 'color' && lvl3 !== 'order' && lvl3 !== 'target' && lvl3 !== 'imageUrl' && lvl3 !== 'backgroundUrl' && lvl3 !== 'description') { 
+                            finalHTML += ` 
+                            <a rel="noopener" class="bubble_a" role="button" tabindex="0" href ="${colorfulMenu[arrPath[1]][lvl2][lvl3].target}">
+                                <div class="bubble" style="background: ${colorfulMenu[arrPath[1]].color}"></div>
+                                <img src="${colorfulMenu[arrPath[1]][lvl2][lvl3].imageUrl}" alt="${lvl3}">
+                                <p class="bubble_p"> ${lvl3} </p>
+                            </a>`
+                        }
+                    }
+                } else { 
+                    let items = Object.getOwnPropertyNames(colorfulMenu[arrPath[1]][lvl2]); 
+                    if (arrPath[2] == lvl2 ) {
+                        if(colorfulMenu[arrPath[1]][lvl2]['description']){
+                            finalHTML += `<div class="building-desc"><p> ${colorfulMenu[arrPath[1]][lvl2]['description']}</p></div>`
+                            }
+                        finalHTML += `<div class="bubble_wrapper">`
+                    }
+                    if(items.length > 4){ 
+                        for(const lvl3 of items) { 
+                            if(lvl3 === 'description' && colorfulMenu[arrPath[1]][arrPath[2]][lvl3] && !check) {
+                                check = true;
+                            } else if(lvl3 !== 'color' && lvl3 !== 'order' && lvl3 !== 'target' && lvl2 == arrPath[2] && lvl3 !== 'imageUrl' && lvl3 !== 'backgroundUrl' && lvl3 !== 'description') {
+                                finalHTML += `<a rel="noopener" class="bubble_a" role="button" tabindex="0" href="${colorfulMenu[arrPath[1]][lvl2][lvl3].target}">
+                                <div class="bubble" style="background: ${colorfulMenu[arrPath[1]].color}"></div>
+                                <img src="${colorfulMenu[arrPath[1]][lvl2][lvl3].imageUrl}" alt="${lvl3}">   
+                                    <p class="bubble_p"> ${lvl3} </p>
+                                </a>`
+                            }
+                        }
+                    }
+                }
+            finalHTML += '</div>';
+            } 
+        }
+        main.innerHTML = finalHTML;
+</script>

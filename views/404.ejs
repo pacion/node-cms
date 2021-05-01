@@ -1,0 +1,13 @@
+<%- include('partials/head') %>
+    <main class="main404">
+        <h1 class="err404">404</h1>
+        <h2> Strona nie istnieje </h2> 
+        <button>Wróć na stronę główną</button>
+    </main>
+    <script>
+        document.querySelector('button').addEventListener('click', () => {
+            location.href = '/';
+        })
+    </script>
+</body>
+</html>

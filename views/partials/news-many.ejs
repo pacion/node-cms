@@ -1,0 +1,138 @@
+<script>
+    function redirection(where) { window.location.replace('/aktualnosci/' + where + '?strona=1');}
+    let tag = "<%- tag %>";
+
+    const buildings = async () => {
+        const res = await fetch('/aktualnosci/api/getTags')
+
+        const data = await res.json();
+
+        const select = document.querySelector('#tags');
+        let option;
+        for(const el of data.buildings) {
+            option = document.createElement('option');
+            option.value = decodeURI(el)
+            option.innerHTML = decodeURI(el)
+            option.style.textTransform = "capitalize"
+            if(tag == el)
+                option.setAttribute("selected", "selected")
+            select.appendChild(option)
+        }
+    }
+    buildings();
+    
+</script>
+<header>
+    <h3><%= header %></h3>
+    <div class="tag-date-cont">
+        <select onchange="redirection(this.value)" name="tags" id="tags">
+            <option <% if(tag == 'wszystkie') {%> selected="selected" <%}%> value="wszystkie">Wszystkie</option>
+        </select>
+        <input type="date" id="date">
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search)
+        const myParam = urlParams.get('data')
+        
+        const date = document.querySelector('#date');
+        date.value = myParam
+        let whereAre = document.querySelector('#tags').value
+        date.addEventListener('change', () => {
+            whereAre = document.querySelector('#tags').value
+            window.location.replace('/aktualnosci/'+whereAre+'?strona=1&data='+date.value);
+        })
+        getDates();
+        async function getDates(){
+            let dateSelector = document.querySelector('#date');
+            const res = await fetch('api/getDates?tag='+whereAre);
+            const data = await res.json();
+
+            if(data.first && data.last){
+                dateSelector.setAttribute('max', data.first);
+                dateSelector.setAttribute('min', data.last);
+            }
+        }
+    </script>
+</header> 
+<% if(empty == 1) { %>
+    <div style="display: flex; justify-content:center; align-items:center; flex-basis:70%">
+        <span style="font-size: 1500%; transform: rotate(90deg); margin-right: -50%;"> :( </span>
+    </div>
+<%} else { %>
+<section class="section-news">
+    <div>
+<% for(const article of content) { %>
+    <article class="article-news">
+        <div>
+            <h3><%= article.title %></h3>
+            <div class="pub-date small"><p class="day"><%= article._id.getTimestamp().getDate() %></p><p class="month"><%= article._id.getTimestamp().toLocaleString('default', { month: 'short' }) %></p><p class="year"><%= article._id.getTimestamp().getFullYear() %></p></div>
+        </div>
+
+        <hr>
+
+        <figure>
+        <% if(article.imageUrl) { %>
+                <img src="<%= article.imageUrl %>" alt="<%= article.imageAlt %>">
+         <%}%>
+            <figcaption><%= article.description %></figcaption>
+        </figure>
+
+        <a rel="noopener" class="nav-arrow nav-arrow-right" tabindex="0" role="button" href="/aktualnosc/<%= article._id %>"><span>Czytaj dalej</span></a>
+    </article>
+<%}%>
+        
+</div>
+</section>
+<div class="pageCounter">
+<% 
+    if(pages > 7){
+        if(currentPage > pages - 2){ %>
+            <span class="pageNumber"><a rel="noopener" href="?strona=1">1</a></span>
+            <span class="dots">...</span> <%
+            for(let i=Number(pages) - 4; i <= Number(pages); i++){
+                if(i==currentPage){ %>
+                    <span class="currentPage"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= Number(currentPage) %>"><%= Number(currentPage) %></a></span> 
+            <%
+                }
+                else{ %>
+                    <span class="pageNumber"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= i %>"><%= i %></a></span>
+                <% }
+            }
+        }
+        else if(currentPage >= 5){ %>
+            <span class="pageNumber"><a rel="noopener" tabindex="0" role="button" href="?strona=1">1</a></span>
+            <span class="dots">...</span> <% 
+            for(let i = -2; i <= 2; i++) {
+                if(i == 0) { %>
+                    <span class="currentPage"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= Number(currentPage) %>"><%= Number(currentPage)%></a></span>
+                <%}
+                else { %>
+                    <span class="pageNumber"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= Number(currentPage) + i %>"><%= Number(currentPage) + i %></a></span>
+               <% }
+            }
+        }
+        else{
+            for(let i = 1; i <= 5; i++) { 
+                if(i == currentPage) { %>
+                    <span class="currentPage"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= i %>"><%= i%></a></span>
+                <%}
+                else { %>
+                    <span class="pageNumber"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= i %>"><%= i %></a></span>
+               <% }
+            }
+        }
+    }
+    else{
+        for(let i = 1; i <= pages; i++) {                 
+            if(i == currentPage) { %>
+                <span class="currentPage"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= i %>"><%= i%></a></span>
+        <% }
+            else { %>
+                <span class="pageNumber"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= i %>"><%= i %></a></span>
+        <% }
+        }
+    } %>
+    <span class="z">z</span>
+    <span class="pageNumber"><a rel="noopener" tabindex="0" role="button" href="?strona=<%= pages %>"><%= pages %></a></span>
+</div>
+<%}%>

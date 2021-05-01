@@ -1,0 +1,36 @@
+<%- include('partials/head') %>
+    <%- include('partials/nav') %>
+    <%- include('partials/colorfulNav') %>
+
+    <main class="news-one-main">
+        <a rel="noopener" class="a-btn" role="button" tabindex="0" href="/aktualnosci" style="align-self: flex-end; margin-right: 5%">Więcej ważnych aktualności...</a>
+        <section class="news-details">
+            <header>
+                <div class="news-mini-img">
+                    <% if(article.imageUrl) { %>
+                        <figure>
+                            <img src="<%= article.imageUrl %>" alt="<%= article.imageAlt %>">
+                        </figure>
+                    <%}%> 
+                </div>
+                <div class="title">
+                    <div>
+                        <h3><%= article.title %></h3>
+                        <div class="pub-date"><p class="day"><%= article._id.getTimestamp().getDate() %></p><p class="month"><%= article._id.getTimestamp().toLocaleString('default', { month: 'short' }) %></p><p class="year"><%= article._id.getTimestamp().getFullYear() %></p></div>
+                    </div>
+                    <hr>
+                    <figcaption><%= article.description %></figcaption>
+                </div>
+                
+            </header>
+
+            <article>
+                <%- article.body %>
+            </article>
+        </section>
+
+        
+    </main>
+    
+
+<%- include('partials/footer') %>

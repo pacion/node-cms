@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <title>CKZIU | Autorzy</title>
+  <meta charset="utf-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/p5.js"></script>
+  <style>
+    *{
+        overflow: hidden;
+      box-sizing: border-box;
+      font-family: monospace;
+      font-size: 115%;
+      color: #022E5D;
+      user-select: none; 
+      margin: 0;
+      padding: 0;
+    }
+    h2{
+      font-size: 500%;
+      margin-top: 2%;
+    }
+    .text{
+      mix-blend-mode: difference;
+      filter: invert(1);
+    }
+    .authors{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+    }
+    .namesNRoles{
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    .n-n-r{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    svg {
+        font-family: 'Russo One', sans-serif;
+    }
+    svg text {
+        animation: stroke 7s infinite alternate;
+        stroke-width: 1;
+        stroke: black;
+        font-size: 90px;
+        fill: #022E5D;
+    }
+    @keyframes stroke {
+        0%   {
+            fill: rgba(2,46,93,0); stroke: rgba(2,46,93,1);
+            stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 1;
+        }
+        10%  {fill: rgba(2,46,93,0); stroke: rgba(2,46,93,1); }
+        30%  {fill: rgba(2,46,93,0); stroke: rgba(2,46,93,1); stroke-width: 2; }
+        100% {
+            fill: rgba(2,46,93,1); stroke: rgba(2,46,93,1); 
+            stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0;
+        }
+    }
+  </style>
+  
+</head>
+<body>
+    <div class="authors">
+        <a rel="noopener" class="text" href="/" style="margin-top: 10px; text-decoration: none;">  Strona główna</a>
+        <h2 class="text">Autorzy</h2>
+        <div class="namesNRoles">
+          <div class="n-n-r">
+            <svg viewBox="0 0 1300 300" class="text">
+                <text x="50%" y="50%" dy=".55em" text-anchor="middle">
+                  Jakub Michalak
+                </text>
+            </svg>
+            <svg viewBox="0 0 1300 300" class="text">
+                <text x="50%" y="50%" dy=".55em" text-anchor="middle">
+                  Koordynator projektu
+                </text>
+            </svg>
+          </div>
+          <div style="text-decoration: none; color: black; background:#E99F41; text-align:center">  Strona wykonana przez uczniów klasy 4bTI (2020/2021) CKZiU:</div>
+          <div class="namesNRoles">
+            <div class="n-n-r">
+              <svg viewBox="0 0 1300 700" class="text">
+                  <text x="50%" y="15%" dy="1.7em" text-anchor="middle">
+                    Jakub Lewandowski
+                  </text>
+                  <text x="50%" y="15%" dy="2.9em" text-anchor="middle">
+                    Patryk Gutowski
+                  </text>
+              </svg>
+              <svg viewBox="0 0 1300 700" class="text">
+                  <text x="50%" y="15%" dy=".5em" text-anchor="middle">
+                    HTML, CSS, JS
+                  </text>
+                  <text x="50%" y="15%" dy="1.7em" text-anchor="middle">
+                    NodeJS, Express
+                  </text>
+                  <text x="50%" y="15%" dy="2.9em" text-anchor="middle">
+                    MongoDB
+                  </text>
+                  <text x="50%" y="15%" dy="4.1em" text-anchor="middle">
+                    p5.js
+                  </text>
+              </svg>
+            </div>
+        </div>
+      </div>
+      
+      <script>
+        function setup() {
+          createCanvas(windowWidth, windowHeight, WEBGL);
+          noFill();
+          angleMode(DEGREES);
+        }
+        
+        let x = 0;
+        let y = 0;
+        
+        function writing(textEl, speed, newText){
+          let i = 0;
+          let oldText = "&nbsp;";
+          if(newText)
+            oldText = newText;
+          else
+            oldText = textEl.innerText;
+          textEl.innerHTML = "&nbsp;";
+          setTimeout(()=>{writingTmp(textEl, oldText, speed, i)},1000)
+        }
+        
+        function writingTmp(textEl, oldText, speed, i){
+          if(i<oldText.length){
+            textEl.innerHTML += oldText.charAt(i);
+            i++;
+            setTimeout(() => {writingTmp(textEl, oldText, speed, i)}, Math.floor(Math.random() * Math.abs((speed - 100))) + 100)
+          }
+          else{
+            textEl.innerHTML += '|'
+            blink(textEl, true)
+            textEl.style.postion = 'fixed';
+          }
+        }
+        
+        function blink(textEl, add){
+          if(add){
+            let text = textEl.innerHTML.split("").splice(0,13);
+            text[text.length] = '|'; 
+            textEl.innerHTML = text.join("");
+            setTimeout(()=> {
+              blink(textEl, false)
+            }, 700)
+          }
+        
+          else{
+            let text = textEl.innerHTML.split("");
+            text[text.length-1] = '&nbsp;'; 
+            textEl.innerHTML = text.join("");
+            setTimeout(()=> {
+              blink(textEl, true)
+            }, 700)
+          }
+        }
+        
+        writing(document.querySelector("h2"), 500)
+        
+        function draw() {
+          background('#022E5D');
+          fill(255,255,255);
+          noStroke();
+          rect(-width/2, -height/2, width/2, height);
+          noFill();
+          x = sin(frameCount * 0.5)*90;
+          y = cos(frameCount * 0.5)*90;
+          stroke(0);
+          push();
+          translate(x,y,210);
+          rotateX(frameCount * 0.5);
+          rotateY(frameCount * 0.5);
+          box(150);
+          pop();
+        }
+
+        function windowResized() {
+          resizeCanvas(windowWidth, windowHeight)
+        }
+        window.onLoad = setup();
+        
+        </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<h3>Szukana fraza: "<%= phrase %>"</h3>
+<div class="result-cont">
+    <%if(empty.news == 1 || empty.contents == 1) { %>
+        <%if(empty.news === 1) { %>
+            <fieldset id="news">
+                <legend>Aktualności</legend>
+                <% for(const article of news) { %>
+                    <article class="one-search-result">
+                        <div class="date-title-cont">
+                            <h3><%= article.title %></h3>
+                        <p class="date"> <%= article._id.getTimestamp().toLocaleDateString() %></p>
+                        </div>      
+                        <hr>
+                        <p><%= article.description %></p>
+                        <a rel="noopener" class="nav-arrow nav-arrow-right" tabindex="0" role="button" href="/aktualnosc/<%= article._id %>"><span>Czytaj dalej</span></a>
+                    </article>
+                <%}%>
+            </fieldset>
+        <% } %>
+        <%if(empty.contents === 1) { %>
+            <fieldset id="content">
+                <legend>Strony</legend>
+                <% for(const content of contents) { %>
+                    <article class="one-search-result">
+                        <% 
+                            const array = content.path.split('/');
+                            const lastPath = array[array.length - 1]
+                            const title = lastPath[0].toUpperCase() + lastPath.slice(1);
+                        %>
+                        <h3><%= title %></h3>
+                        <hr>
+                        <div class="body" id="C<%= content._id %>">. . .</div>
+                        <a rel="noopener" class="nav-arrow nav-arrow-right" tabindex="0" role="button" href="<%= encodeURI(content.path) %>"><span>Czytaj dalej</span></a>
+                    </article>
+                <%}%>
+            </fieldset>
+        <%}%>
+    <% } else { %>
+        <p> Nic nie wyszukano lub podany ciąg nie zawiera minimum 4 znaków. </p>
+    <% } %>
+</div>
+<script>
+    const docs = <%- JSON.stringify(contents) %>
+
+    for(const doc of docs){
+        const body = document.querySelector('#C'+doc._id);
+        const regex = /(<([^>]+)>)/ig
+        const text = doc.body.replace(regex, '');
+        const textShort = text.toString().substr(0, 100)
+        body.innerHTML = textShort; 
+    }
+</script>

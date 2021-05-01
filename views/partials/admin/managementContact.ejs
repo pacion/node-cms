@@ -1,0 +1,151 @@
+<div class="form-container">
+    <form class="form" id="contactForm">
+        <label for="email">email budynku: </label>
+        <input name="email" placeholder="np. poczta@wp.pl" type="email" id="email">
+
+        <label for="telephone">telefon budynku: </label>
+        <input name="telephone" placeholder="np. +48 111 111 222" type="text" id="telephone">
+
+        <label for="address">adres budynku: </label>
+        <input name="address" placeholder="np. Miejscowość, ul. Malinowa 15" type="text" id="address">
+
+        <label for="building">do którego budynku: </label>
+        <select name="building" id="building">
+        </select>
+        <button>Zatwierdź</button>
+    </form>
+    <script>
+        const contactForm = document.querySelector('#contactForm');
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = contactForm.email.value;
+            const phone = contactForm.telephone.value;
+            const address = contactForm.address.value;
+            const building = contactForm.building.value; 
+            try {
+                const res = await fetch('/admin/contactAPI', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, phone, address, building }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                const data = await res.json();
+                if(data.ok == "ok") {
+                    inputsClear();
+                    getContactMenusTable();
+                }
+            }
+            catch (err){
+                console.log(err);
+            }
+        })
+    </script>
+    <div class="table-container">
+        <table>
+        </table>
+    </div>
+    <button id="deleteSelected">Usuń zaznaczone</button>
+    <script>
+        const deleteButton = document.querySelector('#deleteSelected');
+
+        deleteButton.addEventListener('click', () => {
+            deleteFromDatabase('/admin/contactAPI?', getContactMenusTable)
+        });
+    </script>
+</div>
+<script>
+    let tmp = '';
+    let tmp2 = '';
+    const getContactMenusTable = async () => {
+        try{
+            const res = await fetch('/admin/contactAPI', {
+                method: 'GET'
+            })
+            const data = await res.json();
+            if(data.contacts) {
+                let div = document.querySelector('table');
+                div.innerHTML = `
+                <tr>
+                    <th>E-mail</th>
+                    <th>Numer telefonu</th>
+                    <th>Adres</th>
+                    <th>Wybór szkoły</th>
+                    <th>Usuń</th>
+                </tr>`;
+                for(const contact of data.contacts){
+                    div.innerHTML += `
+                    <tr>
+                        <td>
+                            <input type="text" value="${contact.email}" readonly>
+                            <button data-id="${contact._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" value="${contact.phone}" readonly>
+                            <button data-id="${contact._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" value="${contact.address}" readonly>
+                            <button data-id="${contact._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <select data-id="${contact._id}" name="role" readonly>
+                            </select>
+                            <button data-id="${contact._id}" class="invisible confirm" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input data-doc="${contact._id}" class="userCheckbox" type="checkbox">
+                        </td>
+                    </tr>
+                    `;
+                    let select = document.querySelector(`table select[data-id="${contact._id}"]`);
+                    for(building of data.buildings){
+                        let option = document.createElement('option');
+                        option.innerHTML = decodeURI(building);
+                        option.value = building;
+                        if(contact.building == building){
+                            option.setAttribute("selected", "true");
+                        }
+                        select.appendChild(option);
+                    }
+                }
+                let selectContactForm = document.querySelector("#building");
+                selectContactForm.innerHTML = '';
+                for(building of data.buildings){
+                    let option = document.createElement('option');
+                    option.innerHTML = decodeURI(building);
+                    option.value = building;
+                    selectContactForm.appendChild(option);
+                }
+            }
+            const confirmButtons = document.querySelectorAll('.confirm');
+            for(const button of confirmButtons) {
+                button.addEventListener('click', async () => {
+                    const _id = button.dataset.id;
+                    const inputs = button.parentElement.parentElement.querySelectorAll('td input[type="text"]');
+                    const email = inputs[0].value
+                    const phone = inputs[1].value
+                    const address = inputs[2].value
+                    const select = button.parentElement.parentElement.querySelector('td select');   
+                    const building =  select.options[select.selectedIndex].value
+                    try {
+                        const res = await fetch('/admin/contactAPI', {
+                            method: 'PUT',
+                            body: JSON.stringify({ _id, email, phone, address, building }),
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                    
+                        const data = await res.json();
+                    }
+                    catch (err){
+                        console.log(err);
+                    }
+                    getContactMenusTable();
+                })
+            }
+            initializeEditable()
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+   window.onload = getContactMenusTable();
+</script>

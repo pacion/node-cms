@@ -1,0 +1,119 @@
+<%- include('./partials/head') %>
+    <%- include('./partials/nav') %>
+    <%- include('./partials/colorfulNav') %>
+
+    <main class="news-one-main">
+        <h3>Mapa biuletynu</h3>
+        <div class="map">
+            <script>
+                let html = '';
+                lvls1 = Object.getOwnPropertyNames(menu);
+
+
+                for (const lvl1 of lvls1) {
+                    if(Object.getOwnPropertyNames(menu[lvl1]).length <= 2)
+                    html += `
+                        <a href="${menu[lvl1].target}">
+                            <h4>${lvl1}</h4>
+                        </a>
+                        <ul>`;
+                    else{
+                        html += `
+                        <h4 href="${menu[lvl1]}">
+                            ${lvl1}
+                        </h4>
+                        <ul>`;
+                    }
+                    const lvls2 = Object.getOwnPropertyNames(menu[lvl1])
+                    for (const lvl2 of lvls2) {
+                        if (lvl2 !== 'target' && lvl2 !== 'order' && lvl2 !== 'path' && lvl2 !== 'type' && lvl2 !== 'lvl' && lvl2 !== 'description') {
+                            if (lvl2 !== 'test') {
+                                html += `
+                                    <li>
+                                        <a href="${menu[lvl1][lvl2].target}">
+                                        ${lvl2}
+                                        </a>
+                                    </li>
+                                    <ul>
+                                    `
+                            }
+
+                            const lvls3 = Object.getOwnPropertyNames(menu[lvl1][lvl2]);
+                            for (const lvl3 of lvls3) {
+                                if (lvl3 !== 'target' && lvl3 !== 'order' && lvl3 !== 'path' && lvl3 !== 'type' && lvl3 !== 'lvl' && lvl3 !== 'description') {
+                                    html += `
+                                        <li>
+                                            <a href="${menu[lvl1][lvl2][lvl3].target}">
+                                            ${lvl3}
+                                            </a>
+                                        </li>
+                                        <ul>
+                                        `
+                                    const lvls4 = Object.getOwnPropertyNames(menu[lvl1][lvl2][lvl3]);
+                                    for (const lvl4 of lvls4) {
+                                        if (lvl4 !== 'target' && lvl4 !== 'order' && lvl4 !== 'path' && lvl4 !== 'type' && lvl4 !== 'lvl' && lvl4 !== 'description') {
+                                            html += `
+                                        <li>
+                                            <a href="${menu[lvl1][lvl2][lvl3][lvl4].target}">
+                                            ${lvl4}
+                                            </a>
+                                        </li>
+                                        `
+                                        }
+                                    }
+                                    html += `</ul>`;
+                                }
+                            }
+                            html += `</ul>`;
+                        }
+                    }
+                    html += `</ul>`;
+                }
+
+                lvls1 = Object.getOwnPropertyNames(colorfulMenu);
+
+                for (const lvl1 of lvls1) {
+                    if (lvl1 != 'strona główna')
+                        html += `
+                            <h4>
+                                ${lvl1}
+                            </h4>
+                            <ul>`;
+                    const lvls2 = Object.getOwnPropertyNames(colorfulMenu[lvl1])
+                    for (const lvl2 of lvls2) {
+                        if (lvl2 !== 'target' && lvl2 !== 'order' && lvl2 !== 'color' && lvl2 !== 'imageUrl' && lvl2 !== 'imageAlt' && lvl2 !== 'backgroundUrl' && lvl2 !== 'description') {
+                            if (lvl2 !== 'test') {
+                                html += `
+                                        <li>
+                                            <a href="${colorfulMenu[lvl1][lvl2].target}">
+                                            ${lvl2}
+                                            </a>
+                                        </li>
+                                        <ul>
+                                        `
+                            }
+
+                            const lvls3 = Object.getOwnPropertyNames(colorfulMenu[lvl1][lvl2]);
+                            for (const lvl3 of lvls3) {
+                                if (lvl3 !== 'target' && lvl3 !== 'order' && lvl3 !== 'imageUrl' && lvl3 !== 'imageAlt' && lvl3 !== 'color' && lvl3 !== 'backgroundUrl' && lvl3 !== 'description') {
+                                    html += `
+                                                <li>
+                                                    <a href="${colorfulMenu[lvl1][lvl2][lvl3].target}">
+                                                    ${lvl3}
+                                                    </a>
+                                                </li>
+                                                `
+                                }
+                            }
+                            html += `</ul>`;
+                        }
+                    }
+                    html += `</ul>`;
+                }
+
+                document.querySelector('.map').innerHTML = html;
+            </script>
+        </div>
+    </main>
+
+<%- include('./partials/footer') %>

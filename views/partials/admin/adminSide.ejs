@@ -1,0 +1,36 @@
+<nav>
+    <ul class="sideNav">
+        <a href="/" style="display: block;text-align:center">Strona główna</a>
+        <br>
+        <% if(user.privilege == 'administrator') { %>
+            <li>
+                <p class="sideNav_lvl sideNav_lvl1"><a href="/admin/user">Użytkownicy<a></p>
+            </li>
+        <% } %>
+        <li>
+            <p class="sideNav_lvl sideNav_lvl1">Zarządzanie treścią</p>
+            <ul>
+            <% if(user.privilege == 'administrator') { %>
+                <li class="sideNav_lvl sideNav_lvl2">
+                    <a href="/admin/managementColorful">Menu kolorowe</a>
+                </li>
+                <li class="sideNav_lvl sideNav_lvl2">
+                    <a href="/admin/managementContact">Menu kontakowe</a>
+                </li>
+                <li class="sideNav_lvl sideNav_lvl2">
+                    <a href="/admin/managementFooter">Stopka</a>
+                </li>
+                <li class="sideNav_lvl sideNav_lvl2">
+                    <a href="/admin/managementMenu">Menu główne</a>
+                </li>
+            <% } %>
+                <li class="sideNav_lvl sideNav_lvl2">
+                    <a href="/admin/managementNews">Aktualności</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <p style="display: block;text-align:center">Zalogowano jako:</p>
+    <p class="userName"><%= user.username %></p>
+    <a href="/wyloguj" style="display: block;text-align:center">Wyloguj się</a>
+</nav>

@@ -1,0 +1,18 @@
+<div class="menuFloatingButton" style="display: none;">
+    <div id="showMobileMenu">
+        <div class="menuFloatingButton-line"></div>
+        <div class="menuFloatingButton-line"></div>
+        <div class="menuFloatingButton-line"></div>
+    </div>
+</div>
+<%- include('mobileSideMenu'); %>
+<script>
+    document.querySelector('#showMobileMenu').addEventListener('click', () => {
+        let template = document.querySelector('.mobileSideMenu')
+        if(template.style.display == 'block') {
+            template.style.display = 'none';
+        } else {
+            template.style.display = 'block';
+        }
+    })
+</script>

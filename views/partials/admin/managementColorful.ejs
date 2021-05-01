@@ -1,0 +1,372 @@
+<div class="form-container">
+    <form class="form" id="menuAdd">
+        <h2>Dodaj element kolorowego menu</h2>
+        <label for="title">nazwa</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="order">Kolejność</label>
+        <input type="number" id="order" name="order" required> <!--minusowe nie mogą być-->
+
+        <label for="type">Typ</label>
+        <select name="type" id="type" required>
+            <option value="poziom 1">Poziom 1</option> <!--background i color-->
+            <option value="poziom 2">Poziom 2</option>
+            <option value="bąbel-zawartość">Bąbel - zawartość</option>
+            <option value="bąbel-odnośnik">Bąbel - odnośnik</option> <!--image-->
+        </select>
+        
+        <div id="tiny" style="width: 100%; display: none;">
+            <label for="mytextarea">Treść</label>
+            <textarea name="body" id="mytextarea" class="mytextarea" rows="30" style="width: 100%"></textarea>
+        </div>
+        
+        <label for="pos-cont"></label>
+        <div class="position-container" id="pos-cont">        
+        </div>
+        <div class="position-container" id="type-container">
+        </div>
+        <script>
+            const selectMenu = document.querySelector('select[name="type"]');
+
+            selectMenu.addEventListener('change', () => {
+                let choice = '';
+                if(selectMenu.value.includes('poziom 1')) {
+                    choice = 
+                    `<label for="color">Kolor</label> 
+                    <input type="color" id="color" name="color" required>`
+                    choice +=
+                    `
+                    <label for="image">Tło</label>
+                    <input type="file" name="image-bg" accept=".jpg, .jpeg, image/png" onchange="loadFile(event)">
+                    <img class="preview">`
+                } else if(selectMenu.value.includes('bąbel')) {
+                    choice =
+                    `
+                    <label for="image">Ikonka</label>
+                    <input type="file" name="image-icon" accept=".jpg, .jpeg, image/png" onchange="loadFile(event)">
+                    <img class="preview">`
+                }
+
+                const tiny = document.querySelector('#tiny');
+                if(selectMenu.value.includes('bąbel-zawartość')) {
+                    tiny.style.display = "block";
+                } else {
+                    tiny.style.display = "none";
+                }
+                document.querySelector('#choice').innerHTML = choice;
+            });
+        </script>
+
+
+        <div id="choice" style="display: flex; flex-flow: column; justify-content: center; align-items: center;">
+            <label for="color">Kolor</label> 
+            <input type="color" id="color" name="color" required>
+
+            <label for="image">Tło</label>
+            <input type="file" name="image-bg" accept=".jpg, .jpeg, image/png" onchange="loadFile(event)">
+            <img class="preview">
+        </div>
+
+        <label for="target">Target</label>
+        <input type="text" id="target" name="target">
+
+        <button>Zatwierdź</button>
+    </form>
+    <div class="table-container">
+        <table>
+
+        </table>
+    </div>
+    <button id="deleteSelected">Usuń zaznaczone</button>
+</div>
+
+<form id="popUp" class="floatFormInvisible" style="z-index: 100;">
+    <div id="close" class="closeButton">
+        <div></div>
+    </div>
+    <textarea name="body" class="mytextarea" id="editContent" rows="30" cols="40" style="width: 100%;"></textarea>
+    <button>Zatwierdź</button>
+</form>
+
+
+<script>
+    let target = '';
+    let body = '';
+    const popUp = document.querySelector('#popUp')
+    const close = document.querySelector('#close');
+        close.addEventListener('click', () => {
+            popup(popUp)
+        })
+
+    const deleteButton = document.querySelector('#deleteSelected');
+
+    deleteButton.addEventListener('click', () => {
+        deleteFromDatabase('/admin/colorfulMenuDelete?', getColorfulMenuTable);
+    })
+</script>
+<script>
+    const colorfulMenuAdd = document.querySelector('#menuAdd');
+    
+    colorfulMenuAdd.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        try {
+            const ic = document.querySelector("input[name='image-icon']")
+            let icon;
+
+            if(ic !== null) {
+                const icImg = ic.files[0];
+                const fd = new FormData();
+                fd.append('file', icImg);
+
+                const iconUrl = await fetch('/upload/colorfulMenu', {
+                    method: "POST",
+                    body: fd
+                });
+                icon = await iconUrl.json(); 
+            }
+            
+            const bg = document.querySelector("input[name='image-bg']")
+            let background;
+            if(bg !== null) {
+                const bgImg = bg.files[0];
+                const fd2 = new FormData();
+                fd2.append('file', bgImg);
+
+                const backgroundUrl = await fetch('/upload/colorfulMenu', {
+                    method: "POST",
+                    body: fd2
+                });
+                background = await backgroundUrl.json();
+            }
+
+            const title = colorfulMenuAdd.querySelector('input[name="title"]').value;
+            const order = colorfulMenuAdd.querySelector('input[name="order"]').value;
+            let color = colorfulMenuAdd.querySelector('input[name="color"]');
+            color ? color = color.value : '';
+            let path = '';
+            path += colorfulMenuAdd.lvl1 && colorfulMenuAdd.lvl1.value !== '' ? colorfulMenuAdd.lvl1.value : '';
+            path += colorfulMenuAdd.lvl2 && colorfulMenuAdd.lvl2.value !== '' ? '.' + colorfulMenuAdd.lvl2.value : '';
+            path == '' ? path = title : path += '.' + title; 
+            const target = colorfulMenuAdd.querySelector('input[name="target"]').value;
+            const lvl = /[.]/.test(path) ? path.match(/[.]/g).length + 1 : 1;
+            const imageUrl = (icon !== undefined) ? icon.location : '';
+            const backgroundUrl = (background !== undefined) ? background.location : '';
+            const description = document.querySelector('#description') ? document.querySelector('#description').value : '';
+
+            const res = await fetch('/admin/colorfulMenuAdd', {
+                method: 'POST',
+                body: JSON.stringify({ title, order, color, path, target, lvl, imageUrl, backgroundUrl, description }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if(data.ok) {
+                const selectMenu = document.querySelector('select[name="type"]');
+                if(selectMenu.value.includes('bąbel-zawartość')) {
+                    const body = tinymce.get('mytextarea').save();
+
+                    const res2 = await fetch('/admin/contentAPI', {
+                        method: 'POST',
+                        body: JSON.stringify({ body, target }),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data2 = await res2.json(); 
+                }
+                inputsClear();
+                getColorfulMenuTable();
+                
+            }
+            
+        } catch (err) {
+            console.log(err);
+        }
+    })
+</script>
+<script>
+    
+
+    popUp.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        body = tinymce.get("editContent").getContent();
+        
+        const res2 = await fetch('/admin/contentAPI', {
+            method: 'PUT',
+            body: JSON.stringify({ target, body }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+
+        const data2 = await res2.json();
+
+        if(data2.ok == "ok") {
+            popup(popUp, 0);
+        }
+    })
+    const getColorfulMenuTable = async () => {
+        try {
+            const res = await fetch("/admin/getColorful", {
+                method: "GET"
+            });
+
+            const data = await res.json();
+
+            const formSelect = document.querySelector('#type');
+            formSelect.addEventListener("change", (e) => {
+                generateInputs(data, formSelect.value)
+            });
+
+            if(data.documents) {
+
+                let div = document.querySelector("table");
+                div.innerHTML = `
+                <tr>
+                    <th>Tytuł</th>
+                    <th>Typ</th>
+                    <th>Kolejność</th>
+                    <th>Umiejscowienie</th>
+                    <th>Target</th>
+                    <th>Ikonka</th>
+                    <th>Tło</th>
+                    <th>Kolor</th>
+                    <th>Opis</th>
+                    <th>Usuń</th>
+                </tr>`;
+                let title, type;
+                let description;
+                for(const doc of data.documents) {
+                    tmp = doc.path.split('.');
+                    title = tmp[tmp.length-1];
+                    description = `<td><input type="text" name="description" value="${ 'brak edycji' }" readonly><button style="display:none"></button>
+                    </td>`;
+                    if(doc.color && doc.backgroundUrl) {
+                        type = 'poziom 1';
+                    } else if (doc.imageUrl) {
+                        type = 'bąbel';
+
+                        if(doc.target.match(/^\/ckziu\/poj\//)) {
+                            type += '-zawartość';
+                        } else {
+                            type += '-odnośnik';
+                        }
+                    } else {
+                        type = 'poziom 2';
+                        description = `<td>
+                            <input type="text" name="description" value="${ doc.description || '-' }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>`
+                    }
+                
+                    div.innerHTML += `
+                    <tr>
+                        <td>
+                            <input type="text" name="title" value="${ title }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="type" value="${ type }" readonly>
+                            <button class="invisible edit" data-type="${ type }" data-target="${ doc.target }" >Edytuj</button>
+                        </td>
+                        <td>
+                            <input type="text" name="order" value="${ doc.order }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="path" value="${ doc.path }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="target" value="${ doc.target }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="imageUrl" value="${ doc.imageUrl || '-' }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="backgroundUrl" value="${ doc.backgroundUrl || '-' }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>
+                        <td>
+                            <input type="text" name="color" value="${ doc.color || '-' }" readonly>
+                            <button class="invisible confirm" data-id="${ doc._id }" >Zatwierdź</button>
+                        </td>`
+                        +description+
+                        `<td>
+                            <input class="userCheckbox" data-target="${ doc.target }" data-doc="${ doc._id }" type="checkbox">
+                        </td>
+                    </tr>
+                    `;
+                }
+                                
+                const editButtons = document.querySelectorAll('.edit');
+                for(const button of editButtons) {
+                    if(button.dataset.type === 'bąbel-zawartość') {
+                        button.style.visibility = 'visible';
+                
+                        button.addEventListener('click', async () => {
+                            target = decodeURI(button.dataset.target);
+                            try {
+                                const res = await fetch('/admin/contentAPI?path=' + target, {
+                                    method: 'GET',
+                                })
+                                const data = await res.json();
+
+                                tinymce.get("editContent").setContent(data.content);
+
+                                popup(popUp, 1);
+                            } catch (err) {
+                                console.log(err);
+                            }
+                        })
+                    }
+                }
+
+                const confirmButtons = document.querySelectorAll('.confirm');
+                for(const button of confirmButtons) {
+                    button.addEventListener('click', async () => { 
+                        const _id = button.dataset.id;
+                        const title = button.parentElement.parentElement.querySelector('td input[name="title"]').value
+                        const order = button.parentElement.parentElement.querySelector('td input[name="order"]').value
+                        
+                        const fullPath = button.parentElement.parentElement.querySelector('td input[name="path"]').value
+                        const shortPath = fullPath.substr(0, fullPath.lastIndexOf('.'));
+                        const path = (shortPath) ? shortPath + '.' + title : title;
+                        const lvl = /[.]/.test(path) ? path.match(/[.]/g).length + 1 : 1;
+                        const target = button.parentElement.parentElement.querySelector('td input[name="target"]').value
+                        let tmp = button.parentElement.parentElement.querySelector('td input[name="color"]').value;
+                        const color = (tmp == '-') ? '' : tmp;
+                        tmp = button.parentElement.parentElement.querySelector('td input[name="imageUrl"]').value
+                        const imageUrl = (tmp == '-') ? '' : tmp;
+                        tmp = button.parentElement.parentElement.querySelector('td input[name="backgroundUrl"]').value
+                        const backgroundUrl = (tmp == '-') ? '' : tmp;
+                        const description = button.parentElement.parentElement.querySelector('td input[name="description"]').value
+                        
+                        try {
+                            const res = await fetch('/admin/colorfulMenuUpdateSingle', {
+                                method: 'PUT',
+                                body: JSON.stringify({ _id, title, order, color, fullPath, path, target, lvl, imageUrl, backgroundUrl, description }),
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                        
+                            const data = await res.json();
+                        }
+                        catch (err){
+                            console.log(err);
+                        }
+                        getColorfulMenuTable();
+                    })
+                }
+            }
+            initializeEditable();
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+    
+    window.onLoad = getColorfulMenuTable();
+</script>
+<template id="pop">
+
+</template>

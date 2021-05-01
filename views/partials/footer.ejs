@@ -1,0 +1,386 @@
+
+<footer class="mainFooter">
+
+  <div class="swiper-container">
+    <div class="swiper-wrapper">
+      
+    </div>
+  </div>
+  
+  <div class="swiper-pagination"></div>
+  <script src="/swiper/swiper-bundle.min.js"></script>
+  <a rel="noopener" tabindex="0" href="/biuletyn" id="biuletyn">
+    <div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="48px" height="48px"><path d="M0 0h24v24H0z" fill="none"/><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg> 
+      <p>Mapa strony</p>
+    </div>
+  </a>
+  <span id="language" style="position: absolute; right: 0;color: #022E5D; font-size: 12px; visibility: hidden;">Strona napisana w języku polskim.</span>
+  <div class="log-btns">
+    <div>
+    </div>
+  </div>
+  <div class="partners">
+    <p>Współpracujemy z:</p>
+  </div>
+  <script>
+    //innerHTML = `sadd`.concat(' ', innerHTML)
+    finalHTML = document.cookie.match('isLogged') ? `<a rel="noopener"  href="/wyloguj">Wyloguj</a><a rel="noopener" href="/admin">CMS</a>` : `<a rel="noopener" href="/zaloguj"><p>Zaloguj się</p></a>`;
+
+    const foot = document.querySelector('.log-btns > div');
+    foot.innerHTML = finalHTML.concat(' ', foot.innerHTML)
+
+    const imgs = document.querySelectorAll('.swiper-slide');
+    for(const img of imgs) {
+      img.addEventListener('click', () => {
+        window.location = img.dataset.href;
+      })
+    }
+</script>
+</footer>
+<div id="authors" style="width: 100%; font-size:10px; background: #022e5d; color: white; text-align:center; user-select:none; cursor:pointer;"> © Copyright CKZiU Brodnica. Strona wykonana przez uczniów technikum CKZiU Brodnica (kliknij, by uzyskać więcej informacji)</div>
+<script>
+  document.querySelector('#authors').addEventListener('click', () => {
+    window.location.href = '/autorzy';
+  })
+  const photos = document.querySelector('.swiper-wrapper');
+  const footerJ = `<%- JSON.stringify(footer) %>`;
+  const footer = JSON.parse(footerJ);
+  let photosHTML = '';
+  for(const photo of footer) {
+    photosHTML += `<img class="swiper-slide" data-href="${photo.target}" src="${photo.src}" alt="${photo.alt}">`;
+  }
+  photos.innerHTML = photosHTML;
+
+  const images = document.querySelectorAll('.swiper-slide');
+  for(const image of images) {
+    image.style.cursor = 'pointer';
+    image.addEventListener('click', () => {
+      window.open(image.dataset.href);
+    })
+  }
+
+  const swiper = new Swiper('.swiper-container', {
+      grabCursor: true,
+      loop: true,
+      slidesPerView: 4,
+      spaceBetween: 30,
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+      },
+      breakpoints: {
+        1100: {
+          slidesPerView: 11,
+          spaceBetween: 60
+        },
+        800: {
+          slidesPerView: 6,
+          spaceBetween: 60
+        },
+        600: {
+          slidesPerView: 5,
+          spaceBetween: 60
+        }
+      }
+    });
+
+  const div = document.createElement('div');
+  div.id = "popUp";
+  div.classList.add('cookie')
+
+  const cookieText = document.createElement('p');
+  cookieText.innerHTML = 'Strona korzysta z plików cookie w celu realizacji usług zgodnie z <a href="http://wszystkoociasteczkach.pl/polityka-cookies/">Polityką Cookies</a>. Możesz określić warunki przechowywania lub dostępu mechanizmu cookie w Twojej przeglądarce.';
+
+  const closeBtn = document.createElement('div');
+  closeBtn.id = 'close';
+  closeBtn.setAttribute('class', 'closeButtonCookie');
+
+  const x = document.createElement('div');
+
+  closeBtn.appendChild(x);
+  div.appendChild(closeBtn);
+  div.appendChild(cookieText);
+  document.body.appendChild(div);
+
+  document.querySelector('#close').addEventListener('click', () => {
+    const popUp = document.querySelector('#popUp');
+    popUp.addEventListener('click', () => {
+      if(popUp.style.display == 'flex') {
+        popUp.style.display = 'none';
+        localStorage.setItem('cookieAlert', '1');
+      }
+      
+    })
+  })
+
+  const checkCookieAlert = () => {
+    const alert = localStorage.getItem('cookieAlert');
+    const popUp = document.querySelector('#popUp');
+    
+    if(alert == 1) {
+      popUp.style.display = 'none';
+    } else {
+      popUp.style.display = 'flex';
+    }
+  }
+
+  window.onLoad = checkCookieAlert();
+
+</script>
+
+<script>
+  const blackYellow = () => {
+    const root = document.documentElement;
+    document.body.style.background = 'black';
+
+    const contents = document.querySelectorAll('.content');
+    if(contents){
+      contents.forEach(content => {
+        content.style.color = 'yellow';
+      })
+      for(const content of contents) {
+        const allA = content.querySelectorAll('a');
+        for(const a of allA) {
+          a.style.color = 'white';
+        }
+      }
+    }
+    const fieldsets = document.querySelectorAll('fieldset');
+    if(fieldsets) {
+      fieldsets.forEach(fieldset => {
+        fieldset.style.border = '2px solid yellow';
+      })
+    }
+
+    if(document.querySelectorAll('.pub-date')){
+      const circles = document.querySelectorAll('.pub-date')
+      circles.forEach(circle => {
+        circle.style.border = "1px solid yellow"
+      })
+    }
+    
+    const sideNav = document.querySelector('#sideNav');
+    if(sideNav){
+      sideNav.style.borderRight = '1px solid yellow';
+      sideNav.style.borderBottom = '1px solid yellow';
+      sideNav.style.background = 'black';
+      sideNav.style.borderLeft = '1px solid yellow';
+      document.querySelector('.sideNav_lvl-active').style.color = 'black';
+    }
+    
+    const articles = document.querySelectorAll('article');
+    if(articles) {
+      articles.forEach(article => {
+        article.style.color = 'yellow';
+      })
+    }
+
+    const selects = document.querySelectorAll('select');
+    if(selects) {
+      selects.forEach(select => {
+        select.style.background = "black";
+        select.style.color = "yellow";
+        select.style.border = "1px solid yellow";
+      })
+    }
+
+    const bubbleWrapper = document.querySelector('.bubble_wrapper');
+    if(bubbleWrapper) {
+      bubbleWrapper.style.background = "black";
+
+      const bubbles = document.querySelectorAll('.bubble');
+      bubbles.forEach(bubble => {
+        bubble.style.background = 'yellow';
+
+      })
+
+      const bubblesP = document.querySelectorAll('.bubble_p');
+      bubblesP.forEach(bubble => {
+        bubble.style.color = "black";
+        bubble.style.textShadow = '3px 0 3px yellow';
+      })
+      const desc = document.querySelector('.building-desc');
+      if(desc) {
+        desc.style.background = "black";
+        desc.style.borderRight = "1px solid yellow";
+        if(window.screen.width <= 900) {
+          desc.style.border = "";
+          desc.style.borderBottom = "1px solid yellow"
+        }
+      }
+      const bg = document.querySelector('main');
+      bg.style.background = 'black';
+    }
+
+    const currentPage = document.querySelector('.currentPage a');
+    if(currentPage){
+      currentPage.style.background = 'yellow';
+      currentPage.style.color = 'black';
+      
+      const pageNumbers = document.querySelectorAll('.pageNumber a');
+      pageNumbers.forEach(pageNum => {
+        pageNum.style.backgroundColor = 'black';
+        pageNum.style.color = 'yellow';
+        pageNum.addEventListener('mouseover',() => {
+          pageNum.style.border = '2px solid yellow';
+        })
+        pageNum.addEventListener('mouseout', () => {
+          pageNum.style.border = '';
+        })
+      })
+    }
+
+    document.querySelector('#mainNav_logo img').style.filter = 'invert() hue-rotate(24deg) contrast(100%) saturate(300%)';
+    document.querySelector('#mainNav_logo img').style.mixBlendMode = 'difference';
+    const multipleA = document.querySelectorAll('.contact_a');
+    multipleA.forEach(a => {
+      a.style.color = 'yellow';
+    })
+    const multipleImg = document.querySelectorAll('.contact_a img');
+    multipleImg.forEach(img => {
+      img.style.mixBlendMode = 'difference';
+      img.style.filter = 'invert()';
+    })
+    document.querySelector('#lowerNav').style.borderTop = '1px solid yellow';
+    document.querySelector('.header').style.borderBottom = '1px solid yellow';
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, figcaption, span');
+    headers.forEach(header => {
+      header.style.color = "yellow";
+    });
+
+    const szkoly = document.querySelectorAll('.szkoly-rect');
+    szkoly.forEach(szkola => {
+      szkola.style.background = "yellow";
+    });
+
+    const main = document.querySelector('main');
+    main.style.borderTop = '1px solid yellow';
+    main.style.borderBottom = '1px solid yellow';
+
+    const map = document.querySelector('.map');
+    if(map) {
+      map.style.color = 'yellow';
+      const as = document.querySelectorAll('a');
+      as.forEach(a => {
+        a.style.color = 'yellow';
+      })
+      map.style.border = '1px solid yellow';
+    }
+
+    const boxes = document.querySelectorAll('article, section')
+    boxes.forEach(box => {
+      box.style.border = "1px solid yellow"
+    })
+    const sideNavLvl = document.querySelectorAll('.sideNav_lvl')
+    if(sideNavLvl){
+      sideNavLvl.forEach(side => {
+        side.style.border = "1px solid yellow"
+      })
+    }
+    const biuletyn = document.querySelector('#biuletyn div')
+    if(biuletyn){
+        biuletyn.style.backgroundColor = 'yellow';
+        biuletyn.style.color = 'black';
+        const schools = document.querySelectorAll('.szkoly-rect');
+        for(const school of schools) {
+          school.style.color = 'black';
+        }
+    }
+    document.querySelector('#biuletyn svg').style.fill = 'black'
+    document.querySelector('.log-btns div').style.backgroundColor = 'yellow'
+    const login = document.querySelectorAll('.log-btns div > a')
+    login.forEach(log => {
+      log.style.color = 'black'
+    })
+    document.querySelector('.partners').style.backgroundColor = 'yellow'
+    document.querySelector('.partners p').style.color = 'black'
+
+
+    document.querySelector('#mainNav_logo').style.borderRight = '1px solid yellow';
+
+    if(window.screen.width <= 900) {
+      document.querySelector('#mainNav_logo').style.borderRight = '';
+    }
+    
+    root.style.setProperty('--granat', 'black');
+    root.style.setProperty('--white', 'yellow');
+    root.style.setProperty('--now', 'yellow');
+    root.style.setProperty('--news-grey', 'black');
+    root.style.setProperty('--font-change', 'yellow');
+    root.style.setProperty('--hover-text', 'black');
+    root.style.setProperty('--hover-dropdown', 'yellow');
+    root.style.setProperty('--hover-nested', 'yellow');
+    root.style.setProperty('--side-nav-lvl-active', 'yellow');
+    root.style.setProperty('--boxShadow', 'yellow')
+    root.style.setProperty('--hr', 'yellow');
+    root.style.setProperty('--article-full', 'yellow');
+    root.style.setProperty('--arrow', 'yellow');
+    root.style.setProperty('--side-active-text', 'black');
+    root.style.setProperty('--article-light', 'yellow');
+    root.style.setProperty('--school-light-blue', 'black');
+    root.style.setProperty('--school-blue', 'black');
+    root.style.setProperty('--blockquote-back', 'black');
+    root.style.setProperty('--side-nav-bg', 'black');
+  }
+
+
+  document.querySelector('#contrast').addEventListener('click', () => {
+    const theme = localStorage.getItem('theme') || 0;
+    if(theme == 0) {
+      localStorage.setItem('theme', '1');
+    } else {
+      localStorage.setItem('theme', '0');
+    }
+    location.reload();
+  })
+
+  const checkTheme = () => {
+    const theme = localStorage.getItem('theme') || 0;
+    if(theme == 1) {
+      blackYellow();
+    }
+  }
+
+  window.onLoad = checkTheme();
+
+  const minus = document.querySelector('#font-minus');
+  minus.addEventListener('click', () => {
+    let size = parseInt(localStorage.getItem('fontSize')) || parseInt(16);
+    if(size > 16) {
+      size--;
+    }
+    localStorage.setItem('fontSize', size + 'px');
+    checkSize();
+  })
+
+  const plus = document.querySelector('#font-plus');
+  plus.addEventListener('click', () => {
+    let size = parseInt(localStorage.getItem('fontSize')) || parseInt(16);
+    if(size < 21) {
+      size++;
+    }
+    localStorage.setItem('fontSize', size + 'px');
+    checkSize();
+  })
+
+  const checkSize = () => {
+    let size = localStorage.getItem('fontSize');
+    if(size === null) {
+      localStorage.setItem('fontSize', '16px')
+      size = '16px';
+    }
+
+    document.documentElement.style.setProperty('--size', size);
+    }
+
+  window.onLoad = checkSize();
+  
+</script>
+<%- include('mobile/menuFloatingButton'); %>
+</body>
+</html>
