@@ -2,7 +2,7 @@
     <ul class="sideNav">
         <a href="/" style="display: block;text-align:center">Strona główna</a>
         <br>
-        <% if(user.privilege == 'administrator') { %>
+        <% if(/*user.privilege == 'administrator'*/ true) { %>
             <li>
                 <p class="sideNav_lvl sideNav_lvl1"><a href="/admin/user">Użytkownicy<a></p>
             </li>
@@ -10,7 +10,7 @@
         <li>
             <p class="sideNav_lvl sideNav_lvl1">Zarządzanie treścią</p>
             <ul>
-            <% if(user.privilege == 'administrator') { %>
+            <% if(/*user.privilege == 'administrator'*/ true) { %>
                 <li class="sideNav_lvl sideNav_lvl2">
                     <a href="/admin/managementColorful">Menu kolorowe</a>
                 </li>

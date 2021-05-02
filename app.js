@@ -50,6 +50,7 @@ app.use(cookieParser());
 app.use(fileUpload({ createParentPath: true }));
 app.use(cors());
 
+
 app.get('*', authMiddleware.checkUser, existsMenu, changeContactMenu, getFooterSlides);
 
 app.get('', indexController.index);

@@ -25,7 +25,7 @@
   </div>
   <script>
     //innerHTML = `sadd`.concat(' ', innerHTML)
-    finalHTML = document.cookie.match('isLogged') ? `<a rel="noopener"  href="/wyloguj">Wyloguj</a><a rel="noopener" href="/admin">CMS</a>` : `<a rel="noopener" href="/zaloguj"><p>Zaloguj się</p></a>`;
+    finalHTML = document.cookie.match('isLogged') ? `<a rel="noopener"  href="/wyloguj">Wyloguj</a><a rel="noopener" href="/admin">CMS</a>` : `<a rel="noopener" href="/admin"><p>Zaloguj się</p></a>`;
 
     const foot = document.querySelector('.log-btns > div');
     foot.innerHTML = finalHTML.concat(' ', foot.innerHTML)
@@ -38,7 +38,7 @@
     }
 </script>
 </footer>
-<div id="authors" style="width: 100%; font-size:10px; background: #022e5d; color: white; text-align:center; user-select:none; cursor:pointer;"> © Copyright CKZiU Brodnica. Strona wykonana przez uczniów technikum CKZiU Brodnica (kliknij, by uzyskać więcej informacji)</div>
+<div id="authors" style="width: 100%; font-size:10px; background: #022e5d; color: white; text-align:center; user-select:none; cursor:pointer;"> © Copyright CKZiU</div>
 <script>
   document.querySelector('#authors').addEventListener('click', () => {
     window.location.href = '/autorzy';

@@ -3,8 +3,8 @@ const User = require('../models/User');
 
 const requireAuth = (req, res, next) => {
     const token = req.cookies.jwt;
-
-    //token istnieje i jest poprawny
+    next();
+    /*//token istnieje i jest poprawny
     if(token) {
         jwt.verify(token, process.env.SECRET_KEY, (err, decodedToken)=> {
             if (err) {
@@ -18,14 +18,16 @@ const requireAuth = (req, res, next) => {
     }
     else {
         res.redirect('/404');
-    }
+    }*/
 }
 
 //aktualny uzytkownik
 const checkUser = (req, res, next) => {
     const token = req.cookies.jwt;
     
-    if(token) {
+    res.locals.user = "tester";
+    next();
+    /*if(token) {
         jwt.verify(token, process.env.SECRET_KEY, async (err, decodedToken)=> {
             if (err) {
                 console.log(err.message);
@@ -42,7 +44,7 @@ const checkUser = (req, res, next) => {
     else {
         res.locals.user = undefined;//null
         next();
-    }
+    }*/
 }
 
 module.exports = { requireAuth, checkUser };
