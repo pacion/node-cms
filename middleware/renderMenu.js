@@ -17,15 +17,8 @@ const renderMenu = async (req, res, next) => {
                         obj.path.split('.').reduce((r, e) => r[e] = (r[e] || { order: obj.order, target: obj.target, color: obj.color, imageUrl: obj.imageUrl, backgroundUrl: obj.backgroundUrl, description: obj.description || ''}), colorfulMenu)
                     }
                 }
-
-                /* wstawic tu te linijki, async await zwieksza czas ale jest 100% errorproof, a to na dole moze sprawdic ze menu sie nie wczyta
-                    res.locals.menu = menu;
-                    res.locals.colorfulMenu = colorfulMenu;
-                    next();
-                */
             })
         })
-        // jak bedzie blad czytaj powyzej
         res.locals.menu = menu;
         res.locals.colorfulMenu = colorfulMenu;
         next();

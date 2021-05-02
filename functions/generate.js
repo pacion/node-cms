@@ -1,29 +1,29 @@
 module.exports.generate = (param, menu) => {
     
     let finalHTML = "";
-    let wielkosc = Object.getOwnPropertyNames(menu);
+    let size = Object.getOwnPropertyNames(menu);
     
-    for (const podmenu of wielkosc) { // petla po lvl1 w menu
-        let wielkosc2 = Object.getOwnPropertyNames(menu[podmenu])
-        let podmenuParsed = podmenu.replace('-', ' ');
+    for (const submenu of size) { // petla po lvl1 w menu
+        let size2 = Object.getOwnPropertyNames(menu[submenu])
+        let submenuParsed = submenu.replace('-', ' ');
           
-        if(wielkosc2.length > 2) { //Sprawdzanie, czy obiekt ma dzieci 
+        if(size2.length > 2) { //Sprawdzanie, czy obiekt ma dzieci 
             if(param == "menu") {
-                if(menu[podmenu].target == ''){
+                if(menu[submenu].target == ''){
                     finalHTML += `<div class="dropdown">
-                    <span class="menu-item" role="button" tabindex="0"> ${podmenuParsed} </span>
+                    <span class="menu-item" role="button" tabindex="0"> ${submenuParsed} </span>
                     <div class="nested">`;
                 }
                 else{
                     finalHTML += `<div class="dropdown">
-                    <a rel="noopener" href="${menu[podmenu].target}" class="menu-item" role="button" tabindex="0"><h2> ${podmenuParsed} </h2></a>
+                    <a rel="noopener" href="${menu[submenu].target}" class="menu-item" role="button" tabindex="0"><h2> ${submenuParsed} </h2></a>
                     <div class="nested">`;
                 }
             }
-            for (const podmenu2 of wielkosc2) { //pętla po lvl2 w menu
-                if(podmenu2 !== 'target' && podmenu2 !== 'order'){
-                finalHTML += `<a rel="noopener" role="button" tabindex="0" href="${menu[podmenu][podmenu2].target}">
-                    ${podmenu2}
+            for (const submenu2 of size2) { //pętla po lvl2 w menu
+                if(submenu2 !== 'target' && submenu2 !== 'order'){
+                finalHTML += `<a rel="noopener" role="button" tabindex="0" href="${menu[submenu][submenu2].target}">
+                    ${submenu2}
                     </a>`;
                 }       
             }
@@ -31,8 +31,8 @@ module.exports.generate = (param, menu) => {
             </div>`;                
         }
         else { // wypisanie menu z jednym elementem (glowny) && nie ma dzieci
-            finalHTML += `<a target="_blank" role="button" tabindex="0" href="${menu[podmenu].target}" class="menu-item dropdown">
-                <h2>${podmenuParsed}</h2>
+            finalHTML += `<a target="_blank" role="button" tabindex="0" href="${menu[submenu].target}" class="menu-item dropdown">
+                <h2>${submenuParsed}</h2>
                 </a>`;   
         } 
     }

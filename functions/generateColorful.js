@@ -1,21 +1,21 @@
 module.exports.generateColorful = (path, colorfulMenu) => {
-    const wielkosc = Object.getOwnPropertyNames(colorfulMenu);
+    const size = Object.getOwnPropertyNames(colorfulMenu);
     const arrPath = path.split('/');
     let finalHTML = '';
     let css = '';
-    let podmenuParsed = '';
-    for(const podmenu of wielkosc) { 
-        podmenuParsed = podmenu.replace('-', ' '); 
+    let submenuParsed = '';
+    for(const submenu of size) { 
+        submenuParsed = submenu.replace('-', ' '); 
         css = "szkoly-rect";
-        if(arrPath[1] == podmenuParsed || podmenuParsed == "strona główna" && path == '/') {
+        if(arrPath[1] == submenuParsed || submenuParsed == "strona główna" && path == '/') {
             css = "szkoly-rect szkoly-rect-active"; 
-            if(colorfulMenu[podmenu].color == 'white' || colorfulMenu[podmenu].color == '#FFFFFF' || colorfulMenu[podmenu].color == '#FFF'){
+            if(colorfulMenu[submenu].color == 'white' || colorfulMenu[submenu].color == '#FFFFFF' || colorfulMenu[submenu].color == '#FFF'){
                 finalHTML += `<script>document.documentElement.style.setProperty('--now', '#022e5d');</script>`
                 } else { 
-                finalHTML += `<script>document.documentElement.style.setProperty('--now', ${colorfulMenu[podmenu].color} );</script>`
+                finalHTML += `<script>document.documentElement.style.setProperty('--now', ${colorfulMenu[submenu].color} );</script>`
             }
         }   
-        finalHTML += `<a rel="noopener" role="button" tabindex="0" href="${colorfulMenu[podmenu].target}" style="background: ${colorfulMenu[podmenu].color}" class="${css}">${podmenuParsed}</a>`;
+        finalHTML += `<a rel="noopener" role="button" tabindex="0" href="${colorfulMenu[submenu].target}" style="background: ${colorfulMenu[submenu].color}" class="${css}">${submenuParsed}</a>`;
     }
     return finalHTML;
 }
