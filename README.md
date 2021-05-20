@@ -26,6 +26,7 @@ Install all packages.
 npm install
 ```
 
+Rename env into .env.
 Start the page in localhost:3000 - you can change the value of the port in .env file.
 ```bash
 npm run devStart
